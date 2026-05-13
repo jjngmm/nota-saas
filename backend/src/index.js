@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
+const authRoutes = require('./routes/auth');
 
 // Inicializar Express
 const app = express();
@@ -11,6 +12,10 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  req.supabase = supabase;
+  next();
+});
 
 // Inicializar Supabase
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -26,6 +31,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // ==========================================
 // ENDPOINTS
 // ==========================================
+
+app.use('/auth', authRoutes);
 
 // 1. Health Check
 app.get('/health', (req, res) => {
