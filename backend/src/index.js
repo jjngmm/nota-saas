@@ -4,6 +4,9 @@ const cors = require('cors');
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 const authRoutes = require('./routes/auth');
+const doctorRoutes = require('./routes/doctors');   
+const patientRoutes = require('./routes/patients'); 
+const appointmentRoutes = require('./routes/appointments'); 
 
 // Inicializar Express
 const app = express();
@@ -33,6 +36,11 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // ==========================================
 
 app.use('/auth', authRoutes);
+
+// Rutas protegidas (Fase 3)
+app.use('/api', doctorRoutes);
+app.use('/api', patientRoutes);
+app.use('/api', appointmentRoutes);
 
 // 1. Health Check
 app.get('/health', (req, res) => {
