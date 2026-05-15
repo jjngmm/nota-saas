@@ -1,4 +1,6 @@
-// Importaciones
+// ==========================================
+// IMPORTACIONES
+// ==========================================
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -8,19 +10,15 @@ const doctorRoutes = require('./routes/doctors');
 const patientRoutes = require('./routes/patients'); 
 const appointmentRoutes = require('./routes/appointments'); 
 
-// Inicializar Express
+// ==========================================
+// INICIALIZAR EXPRESS
+// ==========================================
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use((req, res, next) => {
-  req.supabase = supabase;
-  next();
-});
-
-// Inicializar Supabase
+// ==========================================
+// INICIALIZAR SUPABASE (PRIMERO, antes de usarlo)
+// ==========================================
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
@@ -30,17 +28,27 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
+console.log('✅ Supabase initialized');
 
 // ==========================================
-// ENDPOINTS
+// MIDDLEWARE
 // ==========================================
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}));
 
-app.use('/auth', authRoutes);
+app.use(express.json());
 
-// Rutas protegidas (Fase 3)
-app.use('/api', doctorRoutes);
-app.use('/api', patientRoutes);
-app.use('/api', appointmentRoutes);
+// Pasar supabase a todas las rutas
+app.use((req, res, next) => {
+  req.supabase = supabase;
+  next();
+});
+
+// ==========================================
+// ENDPOINTS DE PRUEBA
+// ==========================================
 
 // 1. Health Check
 app.get('/health', (req, res) => {
@@ -77,18 +85,30 @@ app.get('/api/test-db', async (req, res) => {
 });
 
 // ==========================================
+// RUTAS DE NEGOCIO
+// ==========================================
+
+app.use('/auth', authRoutes);
+
+// Rutas protegidas (Fase 3)
+app.use('/api', doctorRoutes);
+app.use('/api', patientRoutes);
+app.use('/api', appointmentRoutes);
+
+// ==========================================
 // ERROR HANDLING
 // ==========================================
 
+// Error handler (DEBE ser el último middleware)
 app.use((err, req, res, next) => {
-  console.error('❌ Error:', err);
+  console.error('❌ Error:', err.message);
   res.status(500).json({ 
     error: 'Internal Server Error',
     message: err.message 
   });
 });
 
-// 404
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
@@ -100,4 +120,5 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Nōta Backend running on http://localhost:${PORT}`);
   console.log(`✅ Health check: http://localhost:${PORT}/health`);
+  console.log(`✅ CORS enabled for localhost:5173 and localhost:3000`);
 });

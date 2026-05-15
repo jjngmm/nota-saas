@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { hashPassword, comparePasswords, generateToken } = require('../utils/auth');
 const authMiddleware = require('../middleware/authMiddleware');
+const { hashPassword, comparePasswords, generateToken } = require('../utils/auth');
 
 // ==========================================
-// POST /auth/signup — Registrar usuario
+// POST /auth/signup — Crear usuario
 // ==========================================
 router.post('/signup', async (req, res) => {
   try {
@@ -12,21 +12,9 @@ router.post('/signup', async (req, res) => {
 
     // Validación
     if (!orgId || !email || !password) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Missing required fields',
-        required: ['orgId', 'email', 'password']
-      });
-    }
-
-    // Validar email
-    if (!email.includes('@')) {
-      return res.status(400).json({ error: 'Invalid email format' });
-    }
-
-    // Validar contraseña (mínimo 6 caracteres)
-    if (password.length < 6) {
-      return res.status(400).json({ 
-        error: 'Password must be at least 6 characters' 
+        details: 'orgId, email, and password are required'
       });
     }
 
@@ -38,10 +26,12 @@ router.post('/signup', async (req, res) => {
       .single();
 
     if (orgError || !org) {
-      return res.status(404).json({ error: 'Organization not found' });
+      return res.status(404).json({
+        error: 'Organization not found'
+      });
     }
 
-    // Verificar que el email no existe ya en esta organización
+    // Verificar que el email no existe
     const { data: existingUser } = await req.supabase
       .from('auth_users')
       .select('id')
@@ -50,37 +40,37 @@ router.post('/signup', async (req, res) => {
       .single();
 
     if (existingUser) {
-      return res.status(409).json({ 
-        error: 'User with this email already exists in this organization' 
+      return res.status(409).json({
+        error: 'User already exists',
+        details: 'Email is already registered'
       });
     }
 
-    // Hashear contraseña
+    // Hash de la password
     const passwordHash = await hashPassword(password);
 
     // Crear usuario
-    const { data: user, error } = await req.supabase
+    const { data: user, error: userError } = await req.supabase
       .from('auth_users')
-      .insert([
-        {
-          org_id: orgId,
-          email: email,
-          password_hash: passwordHash,
-          role: 'secretary'
-        }
-      ])
+      .insert([{
+        org_id: orgId,
+        email,
+        password_hash: passwordHash,
+        role: 'secretary',
+        status: 'active'
+      }])
       .select()
       .single();
 
-    if (error) {
-      return res.status(500).json({ 
+    if (userError) {
+      return res.status(500).json({
         error: 'Failed to create user',
-        details: error.message 
+        details: userError.message
       });
     }
 
     // Generar token
-    const token = generateToken(user.id, user.org_id, user.email);
+    const token = generateToken(user.id, orgId, email);
 
     res.status(201).json({
       message: 'User created successfully',
@@ -90,10 +80,13 @@ router.post('/signup', async (req, res) => {
         orgId: user.org_id,
         role: user.role
       },
-      token: token
+      token
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: err.message
+    });
   }
 });
 
@@ -106,46 +99,59 @@ router.post('/login', async (req, res) => {
 
     // Validación
     if (!orgId || !email || !password) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Missing required fields',
-        required: ['orgId', 'email', 'password']
+        details: 'orgId, email, and password are required'
       });
     }
 
-    // Buscar usuario por org_id y email
-    const { data: user, error } = await req.supabase
+    // Verificar que la organización existe
+    const { data: org, error: orgError } = await req.supabase
+      .from('organizations')
+      .select('id')
+      .eq('id', orgId)
+      .single();
+
+    if (orgError || !org) {
+      return res.status(404).json({
+        error: 'Organization not found'
+      });
+    }
+
+    // Buscar usuario
+    const { data: user, error: userError } = await req.supabase
       .from('auth_users')
       .select('*')
       .eq('org_id', orgId)
       .eq('email', email)
       .single();
 
-    if (error || !user) {
-      return res.status(401).json({ 
+    if (userError || !user) {
+      return res.status(401).json({
         error: 'Invalid credentials'
       });
     }
 
-    // Verificar que el usuario está activo
+    // Verificar status
     if (user.status !== 'active') {
-      return res.status(403).json({ 
-        error: 'User account is not active'
+      return res.status(403).json({
+        error: 'User account is inactive'
       });
     }
 
     // Comparar contraseña
-    const passwordMatch = await comparePasswords(password, user.password_hash);
+    const isPasswordValid = await comparePasswords(password, user.password_hash);
 
-    if (!passwordMatch) {
-      return res.status(401).json({ 
+    if (!isPasswordValid) {
+      return res.status(401).json({
         error: 'Invalid credentials'
       });
     }
 
     // Generar token
-    const token = generateToken(user.id, user.org_id, user.email);
+    const token = generateToken(user.id, orgId, email);
 
-    res.json({
+    res.status(200).json({
       message: 'Login successful',
       user: {
         id: user.id,
@@ -153,10 +159,13 @@ router.post('/login', async (req, res) => {
         orgId: user.org_id,
         role: user.role
       },
-      token: token
+      token
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: err.message
+    });
   }
 });
 
@@ -165,18 +174,15 @@ router.post('/login', async (req, res) => {
 // ==========================================
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    // El token ya fue verificado en authMiddleware
-    // req.user contiene la info del token
-    
-    // Obtener datos frescos de la base de datos
+    // authMiddleware ya verificó el token y estableció req.user
     const { data: user, error } = await req.supabase
       .from('auth_users')
-      .select('*')
+      .select('id, email, org_id, role')
       .eq('id', req.user.userId)
       .single();
 
     if (error || !user) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         error: 'User not found'
       });
     }
@@ -186,12 +192,14 @@ router.get('/me', authMiddleware, async (req, res) => {
         id: user.id,
         email: user.email,
         orgId: user.org_id,
-        role: user.role,
-        status: user.status
+        role: user.role
       }
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: err.message
+    });
   }
 });
 
