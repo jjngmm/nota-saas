@@ -1,51 +1,67 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
+import DoctorsPage from "./pages/DoctorsPage";
+import AppointmentsPage from "./pages/AppointmentsPage";
+// import PatientsPage from "./pages/PatientsPage"; // Fase 5 próxima
+import "./styles/nota.css";
+import "./styles/appointments.css";
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
+function ProtectedRoute({ children, roles }) {
+  const { user, token } = useAuth();
+  if (!token) return <Navigate to="/login" replace />;
+  if (roles && !roles.includes(user?.role)) return <Navigate to="/dashboard" replace />;
   return children;
-}
-
-function AppRoutes() {
-  const { isAuthenticated } = useAuth();
-
-  return (
-    <Routes>
-      <Route 
-        path="/login" 
-        element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage />} 
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
-  );
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/doctors"
+            element={
+              <ProtectedRoute>
+                <DoctorsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/appointments"
+            element={
+              <ProtectedRoute>
+                <AppointmentsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/appointments/new"
+            element={
+              <ProtectedRoute>
+                <AppointmentsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

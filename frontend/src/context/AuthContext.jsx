@@ -74,11 +74,11 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = () => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
-  }, []);
+  };
 
   const value = {
     user,
