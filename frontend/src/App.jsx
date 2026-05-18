@@ -4,9 +4,10 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import DoctorsPage from "./pages/DoctorsPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
-// import PatientsPage from "./pages/PatientsPage"; // Fase 5 próxima
+import PatientsPage from "./pages/PatientsPage";
 import "./styles/nota.css";
 import "./styles/appointments.css";
+import "./styles/patients.css";
 
 function ProtectedRoute({ children, roles }) {
   const { user, token } = useAuth();
@@ -54,6 +55,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AppointmentsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/patients"
+            element={
+              <ProtectedRoute roles={["secretary", "admin"]}>
+                <PatientsPage />
               </ProtectedRoute>
             }
           />
