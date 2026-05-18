@@ -8,6 +8,7 @@ import PatientsPage from "./pages/PatientsPage";
 import "./styles/nota.css";
 import "./styles/appointments.css";
 import "./styles/patients.css";
+import "./styles/dashboard.css";
 
 function ProtectedRoute({ children, roles }) {
   const { user, token } = useAuth();
