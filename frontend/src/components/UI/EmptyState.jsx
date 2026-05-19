@@ -1,22 +1,33 @@
-export default function EmptyState({ title, description, action, icon = "empty" }) {
+import React from 'react';
+
+const EmptyState = ({ 
+  icon = '📋',
+  title = 'Sin resultados',
+  description = 'No hay datos para mostrar',
+  action,
+  actionLabel = 'Crear nuevo'
+}) => {
   return (
-    <div className="empty-state">
-      <div className="empty-icon">
-        {icon === "error" ? (
-          <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        ) : (
-          <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-          </svg>
-        )}
+    <div className="flex flex-col items-center justify-center gap-4 py-12 px-6 text-center">
+      <div className="text-5xl">{icon}</div>
+      <div>
+        <h3 className="text-lg font-semibold text-[#0D1117] mb-2">
+          {title}
+        </h3>
+        <p className="text-sm text-[#7A8A96] max-w-sm">
+          {description}
+        </p>
       </div>
-      <p className="empty-title">{title}</p>
-      {description && <p className="empty-desc">{description}</p>}
-      {action && <div className="empty-action">{action}</div>}
+      {action && (
+        <button
+          onClick={action}
+          className="mt-4 px-4 py-2 bg-[#2D5A3D] text-white rounded-lg hover:bg-[#1B3A2A] transition-colors text-sm font-medium"
+        >
+          {actionLabel}
+        </button>
+      )}
     </div>
   );
-}
+};
+
+export default EmptyState;

@@ -1,11 +1,54 @@
-const GENDER_MAP = {
-  male:   { label: "Masculino", cls: "badge--blue" },
-  female: { label: "Femenino",  cls: "badge--pink" },
-  other:  { label: "Otro",      cls: "badge--gray" },
+import React from 'react';
+
+const GenderBadge = ({ gender }) => {
+  const genderStyles = {
+    'Masculino': {
+      bg: '#E3F2FD',
+      text: '#1565C0',
+      border: '#90CAF9',
+      icon: '♂'
+    },
+    'Femenino': {
+      bg: '#FCE4EC',
+      text: '#C2185B',
+      border: '#F48FB1',
+      icon: '♀'
+    },
+    'Otro': {
+      bg: '#F3E5F5',
+      text: '#7B1FA2',
+      border: '#CE93D8',
+      icon: '⊗'
+    },
+    'M': {
+      bg: '#E3F2FD',
+      text: '#1565C0',
+      border: '#90CAF9',
+      icon: '♂'
+    },
+    'F': {
+      bg: '#FCE4EC',
+      text: '#C2185B',
+      border: '#F48FB1',
+      icon: '♀'
+    }
+  };
+
+  const style = genderStyles[gender] || genderStyles['Otro'];
+
+  return (
+    <span
+      className="px-2 py-1 text-xs font-medium rounded-full inline-flex items-center gap-1"
+      style={{
+        backgroundColor: style.bg,
+        color: style.text,
+        border: `0.5px solid ${style.border}`
+      }}
+    >
+      <span>{style.icon}</span>
+      {gender}
+    </span>
+  );
 };
 
-export default function GenderBadge({ gender }) {
-  const config = GENDER_MAP[gender] || { label: "—", cls: "badge--gray" };
-  if (!gender) return <span className="text-muted text-sm">—</span>;
-  return <span className={`badge ${config.cls}`}>{config.label}</span>;
-}
+export default GenderBadge;

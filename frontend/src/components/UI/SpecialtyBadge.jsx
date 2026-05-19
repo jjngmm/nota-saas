@@ -1,26 +1,34 @@
-const SPECIALTY_COLORS = {
-  "Medicina General": "badge--blue",
-  "Pediatría": "badge--green",
-  "Cardiología": "badge--red",
-  "Ginecología": "badge--purple",
-  "Traumatología": "badge--orange",
-  "Neurología": "badge--indigo",
-  "Dermatología": "badge--pink",
-  "Oftalmología": "badge--teal",
-  "Ortopedia": "badge--yellow",
-  "Psiquiatría": "badge--violet",
-};
+import React from 'react';
 
-function getColor(specialty) {
-  if (!specialty) return "badge--gray";
-  return SPECIALTY_COLORS[specialty] || "badge--gray";
-}
+const SpecialtyBadge = ({ specialty }) => {
+  const specialtyIcons = {
+    'Cardiología': '❤️',
+    'Dermatología': '🔬',
+    'Oftalmología': '👁️',
+    'Otorrinolaringología': '👂',
+    'Neumología': '🫁',
+    'Neurología': '🧠',
+    'Pediatría': '👶',
+    'Psiquiatría': '🧠',
+    'Ortopedia': '🦴',
+    'Gastroenterología': '🍽️',
+    'Endocrinología': '⚖️',
+    'Reumatología': '💪',
+    'Ginecología': '🏥',
+    'Urología': '🏥',
+    'Medicina General': '🩺'
+  };
 
-export default function SpecialtyBadge({ specialty }) {
-  if (!specialty) return <span className="badge badge--gray">—</span>;
+  const icon = specialtyIcons[specialty] || '🏥';
+
   return (
-    <span className={`badge ${getColor(specialty)}`}>
+    <span
+      className="px-3 py-1 text-xs font-medium rounded-full inline-flex items-center gap-1.5 bg-[#EAF0EB] text-[#2D5A3D] border border-[#B8CEBC]"
+    >
+      <span>{icon}</span>
       {specialty}
     </span>
   );
-}
+};
+
+export default SpecialtyBadge;
