@@ -1,5 +1,5 @@
-import Button from "../ui/Button";
-import SpecialtyBadge from "../ui/SpecialtyBadge";
+import Button from "../../components/ui/Button";
+import SpecialtyBadge from "../../components/ui/SpecialtyBadge";
 
 function getInitials(name = "") {
   return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();

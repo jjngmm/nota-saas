@@ -1,4 +1,4 @@
-import StatusBadge from "../ui/StatusBadge";
+import StatusBadge from "../../components/ui/StatusBadge";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";

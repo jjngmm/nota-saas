@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
-import GenderBadge from "../ui/GenderBadge";
-import StatusBadge from "../ui/StatusBadge";
-import Button from "../ui/Button";
+import GenderBadge from "../../components/ui/GenderBadge";
+import StatusBadge from "../../components/ui/StatusBadge";
+import Button from "../../components/ui/Button";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";

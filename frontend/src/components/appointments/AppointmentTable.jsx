@@ -1,5 +1,5 @@
-import StatusBadge from "../ui/StatusBadge";
-import Button from "../ui/Button";
+import StatusBadge from "../../components/ui/StatusBadge";
+import Button from "../../components/ui/Button";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
