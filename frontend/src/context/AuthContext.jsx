@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/login`,
-        { org_id: orgId, email, password }
+        { orgId: orgId, email, password }
       );
       const { token: newToken, user: userData } = response.data;
       setToken(newToken);
