@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/layout/Sidebar";

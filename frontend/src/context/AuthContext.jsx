@@ -1,7 +1,7 @@
-import React, { createContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -9,89 +9,56 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Verificar si token es válido al cargar
+  const verifyToken = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/verify`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setUser(response.data.user);
+      setError(null);
+    } catch {
+      setToken(null);
+      setUser(null);
+      localStorage.removeItem('token');
+    }
+  }, [token]);
+
   useEffect(() => {
     if (token) {
       verifyToken();
     }
-  }, [token]);
-
-  const verifyToken = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/auth/me`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-      
-      const userData = {
-        userId: response.data.user.id,
-        email: response.data.user.email,
-        orgId: response.data.user.orgId,
-        role: response.data.user.role
-      };
-      
-      setUser(userData);
-    } catch (err) {
-      setToken(null);
-      localStorage.removeItem('token');
-      setUser(null);
-    }
-  };
+  }, [token, verifyToken]);
 
   const login = useCallback(async (orgId, email, password) => {
     setIsLoading(true);
     setError(null);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/login`,
-        { orgId, email, password }
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/login`,
+        { org_id: orgId, email, password }
       );
-      
-      // La respuesta tiene: { message, user, token }
-      const { token: newToken, user: newUser } = response.data;
-      
-      // Extractar datos del usuario
-      const userData = {
-        userId: newUser.id,
-        email: newUser.email,
-        orgId: newUser.orgId,
-        role: newUser.role
-      };
-      
+      const { token: newToken, user: userData } = response.data;
       setToken(newToken);
       setUser(userData);
       localStorage.setItem('token', newToken);
-      
-      return { success: true };
+      return true;
     } catch (err) {
-      const errorMsg = err.response?.data?.error || 'Login failed';
-      setError(errorMsg);
-      return { success: false, error: errorMsg };
+      setError(err.response?.data?.message || 'Login failed');
+      return false;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
-  };
-
-  const value = {
-    user,
-    token,
-    isLoading,
-    error,
-    login,
-    logout,
-    isAuthenticated: !!token && !!user,
-  };
+  }, []);
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, token, isLoading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

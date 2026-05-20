@@ -1,6 +1,4 @@
-import React from 'react';
-
-const StatusBadge = ({ status, variant = 'default' }) => {
+const StatusBadge = ({ status }) => {
   const statusStyles = {
     'Recepcionada': {
       bg: '#FFF3E0',

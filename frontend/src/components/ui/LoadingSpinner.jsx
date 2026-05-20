@@ -1,5 +1,3 @@
-import React from 'react';
-
 const LoadingSpinner = ({ size = 'md', text = 'Cargando...' }) => {
   const sizes = {
     sm: 'w-6 h-6',

@@ -1,5 +1,3 @@
-import React from 'react';
-
 const SpecialtyBadge = ({ specialty }) => {
   const specialtyIcons = {
     'Cardiología': '❤️',

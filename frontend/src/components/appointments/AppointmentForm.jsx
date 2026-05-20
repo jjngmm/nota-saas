@@ -1,50 +1,51 @@
-import { useState, useEffect } from "react";
-import api from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
-import Button from "../../components/ui/Button";
-import Input from "../../components/ui/Input";
-import Select from "../../components/ui/Select";
+import { useState, useEffect } from 'react';
+import api from '../../services/api';
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import Select from '../ui/Select';
 
-const STATUS_OPTIONS = [
-  { value: "scheduled", label: "Programada" },
-  { value: "confirmed", label: "Confirmada" },
-  { value: "completed", label: "Completada" },
-  { value: "cancelled", label: "Cancelada" },
-  { value: "no_show", label: "No se presentó" },
-];
-
-const EMPTY_FORM = {
-  patient_id: "",
-  doctor_id: "",
-  appointment_date: "",
-  start_time: "",
-  end_time: "",
-  reason: "",
-  notes: "",
-  status: "scheduled",
-};
-
-export default function AppointmentForm({
-  appointment,
-  doctors,
-  preselectedDoctorId,
-  onSuccess,
-  onClose,
-}) {
-  const { user } = useAuth();
-  const isEditing = !!appointment;
-  const isSecretary = user?.role === "secretary" || user?.role === "admin";
-
-  const [form, setForm] = useState(EMPTY_FORM);
+const AppointmentForm = ({ 
+  isEditing = false, 
+  appointment = null, 
+  isSecretary = false,
+  preselectedDoctorId = null,
+  onSubmit, 
+  onClose 
+}) => {
   const [patients, setPatients] = useState([]);
-  const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
-  const [apiError, setApiError] = useState(null);
+  const [doctors, setDoctors] = useState([]);
+  const [form, setForm] = useState({
+    patient_id: '',
+    doctor_id: preselectedDoctorId || '',
+    appointment_date: '',
+    start_time: '',
+    end_time: '',
+    reason: '',
+    notes: ''
+  });
+
+  async function fetchPatients() {
+    try {
+      const res = await api.get("/api/patients");
+      setPatients(res.data || []);
+    } catch {
+      // Non-critical
+    }
+  }
+
+  async function fetchDoctors() {
+    try {
+      const res = await api.get("/api/doctors");
+      setDoctors(res.data || []);
+    } catch {
+      // Non-critical
+    }
+  }
 
   useEffect(() => {
+    fetchDoctors();
     if (isSecretary) fetchPatients();
-
-    if (isEditing) {
+    if (isEditing && appointment) {
       setForm({
         patient_id: appointment.patient_id || "",
         doctor_id: appointment.doctor_id || "",
@@ -52,237 +53,113 @@ export default function AppointmentForm({
         start_time: appointment.start_time || "",
         end_time: appointment.end_time || "",
         reason: appointment.reason || "",
-        notes: appointment.notes || "",
-        status: appointment.status || "scheduled",
+        notes: appointment.notes || ""
       });
-    } else if (preselectedDoctorId) {
-      setForm((prev) => ({ ...prev, doctor_id: preselectedDoctorId }));
     }
-
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
-  }, []);
-
-  async function fetchPatients() {
-    try {
-      const res = await api.get("/api/patients");
-      setPatients(res.data || []);
-    } catch {
-      // Non-critical, continue
-    }
-  }
+  }, [isEditing, appointment, isSecretary, preselectedDoctorId]);
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: null }));
+    setForm(prev => ({ ...prev, [name]: value }));
   }
 
-  function validate() {
-    const errs = {};
-    if (!form.patient_id) errs.patient_id = "Selecciona un paciente";
-    if (!form.doctor_id) errs.doctor_id = "Selecciona un médico";
-    if (!form.appointment_date) errs.appointment_date = "Ingresa la fecha";
-    if (!form.start_time) errs.start_time = "Ingresa la hora de inicio";
-    return errs;
-  }
-
-  async function handleSubmit() {
-    const errs = validate();
-    if (Object.keys(errs).length) {
-      setErrors(errs);
-      return;
-    }
-
-    setSaving(true);
-    setApiError(null);
-
-    try {
-      let res;
-      if (isEditing) {
-        res = await api.patch(`/api/appointments/${appointment.id}`, form);
-      } else {
-        res = await api.post("/api/appointments", form);
-      }
-      onSuccess(res.data);
-    } catch (err) {
-      setApiError(err.response?.data?.message || "Error al guardar la cita.");
-    } finally {
-      setSaving(false);
-    }
+  function handleSubmit(e) {
+    e.preventDefault();
+    onSubmit(form);
   }
 
   function handleBackdrop(e) {
     if (e.target === e.currentTarget) onClose();
   }
 
-  const patientOptions = [
-    { value: "", label: "Seleccionar paciente..." },
-    ...patients.map((p) => ({ value: p.id, label: p.full_name })),
-  ];
-
-  const doctorOptions = [
-    { value: "", label: "Seleccionar médico..." },
-    ...doctors.map((d) => ({ value: d.id, label: `${d.full_name} — ${d.specialty || ""}` })),
-  ];
-
-  // Doctors can only edit notes/status, not the core fields
-  const readOnly = !isSecretary;
-
   return (
-    <div className="modal-backdrop" onClick={handleBackdrop}>
-      <div className="modal modal--lg">
-        {/* Header */}
-        <div className="modal-header">
-          <div>
-            <h3 className="modal-title">
-              {isEditing ? "Editar cita" : "Nueva cita"}
-            </h3>
-            <p className="modal-subtitle">
-              {isEditing
-                ? "Modifica los datos de la cita"
-                : "Completa los campos para agendar"}
-            </p>
-          </div>
-          <button className="modal-close" onClick={onClose}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="modal-body">
-          {apiError && (
-            <div className="form-error-banner">{apiError}</div>
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={handleBackdrop}
+    >
+      <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-screen overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4">
+          {isEditing ? "Editar cita" : "Nueva cita"}
+        </h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {isSecretary && (
+            <Select
+              label="Paciente"
+              name="patient_id"
+              value={form.patient_id}
+              onChange={handleChange}
+              options={patients.map(p => ({ value: p.id, label: p.full_name }))}
+              required
+            />
           )}
+          
+          <Select
+            label="Doctor"
+            name="doctor_id"
+            value={form.doctor_id}
+            onChange={handleChange}
+            options={doctors.map(d => ({ value: d.id, label: d.full_name }))}
+            required
+          />
 
-          <div className="form-grid">
-            {/* Patient */}
-            {isSecretary ? (
-              <div className="form-field form-field--full">
-                <Select
-                  label="Paciente"
-                  name="patient_id"
-                  value={form.patient_id}
-                  onChange={handleChange}
-                  options={patientOptions}
-                  required
-                  error={errors.patient_id}
-                  disabled={readOnly}
-                />
-              </div>
-            ) : (
-              <div className="form-field form-field--full">
-                <label className="input-label">Paciente</label>
-                <p className="form-readonly">{appointment?.patient_name || "—"}</p>
-              </div>
-            )}
+          <Input
+            label="Fecha"
+            type="date"
+            name="appointment_date"
+            value={form.appointment_date}
+            onChange={handleChange}
+            required
+          />
 
-            {/* Doctor */}
-            <div className="form-field form-field--full">
-              <Select
-                label="Médico"
-                name="doctor_id"
-                value={form.doctor_id}
-                onChange={handleChange}
-                options={doctorOptions}
-                required
-                error={errors.doctor_id}
-                disabled={readOnly}
-              />
-            </div>
+          <Input
+            label="Hora inicio"
+            type="time"
+            name="start_time"
+            value={form.start_time}
+            onChange={handleChange}
+            required
+          />
 
-            {/* Date */}
-            <div className="form-field">
-              <Input
-                label="Fecha"
-                type="date"
-                name="appointment_date"
-                value={form.appointment_date}
-                onChange={handleChange}
-                required
-                error={errors.appointment_date}
-                disabled={readOnly}
-              />
-            </div>
+          <Input
+            label="Hora fin"
+            type="time"
+            name="end_time"
+            value={form.end_time}
+            onChange={handleChange}
+            required
+          />
 
-            {/* Start time */}
-            <div className="form-field">
-              <Input
-                label="Hora inicio"
-                type="time"
-                name="start_time"
-                value={form.start_time}
-                onChange={handleChange}
-                required
-                error={errors.start_time}
-                disabled={readOnly}
-              />
-            </div>
+          <Input
+            label="Motivo"
+            name="reason"
+            value={form.reason}
+            onChange={handleChange}
+            placeholder="Motivo de la consulta"
+          />
 
-            {/* End time */}
-            <div className="form-field">
-              <Input
-                label="Hora fin"
-                type="time"
-                name="end_time"
-                value={form.end_time}
-                onChange={handleChange}
-                disabled={readOnly}
-              />
-            </div>
+          <Input
+            label="Notas"
+            name="notes"
+            value={form.notes}
+            onChange={handleChange}
+            placeholder="Notas adicionales"
+          />
 
-            {/* Status */}
-            <div className="form-field">
-              <Select
-                label="Estado"
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                options={STATUS_OPTIONS}
-              />
-            </div>
-
-            {/* Reason */}
-            <div className="form-field form-field--full">
-              <label className="input-label">Motivo de consulta</label>
-              <textarea
-                name="reason"
-                value={form.reason}
-                onChange={handleChange}
-                placeholder="Describe el motivo de la cita..."
-                rows={2}
-                className="textarea-el"
-                disabled={readOnly}
-              />
-            </div>
-
-            {/* Notes */}
-            <div className="form-field form-field--full">
-              <label className="input-label">Notas clínicas</label>
-              <textarea
-                name="notes"
-                value={form.notes}
-                onChange={handleChange}
-                placeholder="Observaciones adicionales..."
-                rows={3}
-                className="textarea-el"
-              />
-            </div>
+          <div className="flex gap-2 mt-6">
+            <Button type="submit" variant="primary">
+              {isEditing ? "Guardar cambios" : "Crear cita"}
+            </Button>
+            <Button type="button" variant="secondary" onClick={onClose}>
+              Cancelar
+            </Button>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="modal-footer">
-          <Button variant="ghost" onClick={onClose} disabled={saving}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmit} disabled={saving}>
-            {saving ? "Guardando..." : isEditing ? "Guardar cambios" : "Agendar cita"}
-          </Button>
-        </div>
+        </form>
       </div>
     </div>
   );
-}
+};
+
+export default AppointmentForm;
