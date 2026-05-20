@@ -204,3 +204,18 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+// ==========================================
+// GET /auth/verify — Verificar token
+// ==========================================
+router.get('/verify', authMiddleware, async (req, res) => {
+  try {
+    res.json({ 
+      user: req.user,
+      message: 'Token is valid' 
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+module.exports = router;
