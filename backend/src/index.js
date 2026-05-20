@@ -14,7 +14,7 @@ const appointmentRoutes = require('./routes/appointments');
 // INICIALIZAR EXPRESS
 // ==========================================
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // ==========================================
 // INICIALIZAR SUPABASE (PRIMERO, antes de usarlo)

@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "buildCommand": "npm install",
-  "env": {
-    "PORT": "3001"
-  }
-}
