@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login, isLoading, error } = useAuth();
+  const [isSignup, setIsSignup] = useState(false);
   
   const [formData, setFormData] = useState({
     orgId: '',
@@ -19,18 +20,48 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await login(formData.orgId, formData.email, formData.password);
-    if (result.success) {
-      navigate('/dashboard');
+    
+    if (isSignup) {
+      // Signup
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orgId: formData.orgId,
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          alert('Signup exitoso. Ahora inicia sesión.');
+          setIsSignup(false);
+          setFormData({ orgId: '', email: '', password: '' });
+        } else {
+          alert(`Error: ${data.error}`);
+        }
+      } catch (err) {
+        alert(`Error: ${err.message}`);
+      }
+    } else {
+      // Login
+      const result = await login(formData.orgId, formData.email, formData.password);
+      if (result) {
+        navigate('/dashboard');
+      }
     }
   };
 
   return (
     <div className="min-h-screen bg-nota-cream flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-nota-light">
-        <h1 className="text-3xl font-light text-center mb-8 text-nota-ink font-serif">
+        <h1 className="text-3xl font-light text-center mb-2 text-nota-ink font-serif">
           Nōta
         </h1>
+        <p className="text-center text-nota-mid text-sm mb-8">
+          {isSignup ? 'Crear cuenta' : 'Iniciar sesión'}
+        </p>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -89,9 +120,21 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full bg-nota-forest text-nota-cream py-2 rounded-lg font-medium hover:bg-nota-forest-mid disabled:opacity-50"
           >
-            {isLoading ? 'Cargando...' : 'Iniciar Sesión'}
+            {isLoading ? 'Cargando...' : isSignup ? 'Crear cuenta' : 'Iniciar Sesión'}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => {
+              setIsSignup(!isSignup);
+              setFormData({ orgId: '', email: '', password: '' });
+            }}
+            className="text-nota-forest hover:underline text-sm"
+          >
+            {isSignup ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
+          </button>
+        </div>
       </div>
     </div>
   );
