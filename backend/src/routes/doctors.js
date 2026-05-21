@@ -10,7 +10,6 @@ router.post('/doctors', authMiddleware, async (req, res) => {
     const { first_name, last_name, specialty, license_number, phone, bio } = req.body;
     const org_id = req.user.orgId;
 
-    // Validación
     if (!first_name || !last_name || !specialty || !license_number) {
       return res.status(400).json({
         error: 'Missing required fields',
@@ -18,7 +17,6 @@ router.post('/doctors', authMiddleware, async (req, res) => {
       });
     }
 
-    // Insertar doctor
     const { data, error } = await req.supabase
       .from('doctors')
       .insert([{
