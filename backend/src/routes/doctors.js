@@ -23,7 +23,7 @@ router.post('/doctors', authMiddleware, async (req, res) => {
       .from('doctors')
       .insert([{
         org_id,
-        user_id: req.user.id,
+        user_id: req.user.userId,
         first_name,
         last_name,
         specialty,
