@@ -4,23 +4,22 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/doctors', authMiddleware, async (req, res) => {
   try {
+    // Solo admin puede crear doctors directamente
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Unauthorized',
+        details: 'Only admins can create doctors directly. Doctors must request approval.'
+      });
+    }
+
     const { first_name, last_name, specialty, license_number, phone, bio } = req.body;
     const org_id = req.user.orgId;
     const user_id = req.user.userId;
-
-    console.log('Creating doctor with org_id:', org_id, 'user_id:', user_id);
 
     if (!first_name || !last_name || !specialty || !license_number) {
       return res.status(400).json({
         error: 'Missing required fields',
         details: 'first_name, last_name, specialty, and license_number are required'
-      });
-    }
-
-    if (!org_id) {
-      return res.status(400).json({
-        error: 'Missing org_id',
-        details: 'org_id is required in token'
       });
     }
 
@@ -40,7 +39,6 @@ router.post('/doctors', authMiddleware, async (req, res) => {
       .select();
 
     if (error) {
-      console.log('Supabase error:', error);
       return res.status(400).json({
         error: 'Failed to create doctor',
         details: error.message
@@ -52,7 +50,6 @@ router.post('/doctors', authMiddleware, async (req, res) => {
       doctor: data[0]
     });
   } catch (err) {
-    console.log('Catch error:', err);
     res.status(500).json({ error: err.message });
   }
 });
