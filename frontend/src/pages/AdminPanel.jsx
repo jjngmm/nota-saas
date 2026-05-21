@@ -5,10 +5,15 @@ import Input from '../components/ui/Input';
 import api from '../services/api';
 
 export default function AdminPanel() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [activeTab, setActiveTab] = useState('doctors');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  // Debug: mostrar rol actual
+  console.log('Current user:', user);
+  console.log('Current role:', user?.role);
+  console.log('Has token:', !!token);
 
   // Form states
   const [doctorForm, setDoctorForm] = useState({
@@ -91,19 +96,25 @@ export default function AdminPanel() {
     }
   };
 
-  if (user?.role !== 'secretary' && user?.role !== 'admin') {
+  // Check role - show message if not authorized
+  if (!user || (user?.role !== 'secretary' && user?.role !== 'admin')) {
     return (
       <div className="p-8">
-        <p className="text-nota-mid">No tienes permisos para acceder a este panel.</p>
+        <h1 className="text-2xl font-light text-nota-ink mb-4 font-serif">
+          Acceso Denegado
+        </h1>
+        <p className="text-nota-mid mb-4">No tienes permisos para acceder a este panel.</p>
+        <p className="text-sm text-nota-light">Tu rol actual: <strong>{user?.role || 'desconocido'}</strong></p>
       </div>
     );
   }
 
   return (
     <div className="p-8 max-w-4xl">
-      <h1 className="text-3xl font-light text-nota-ink mb-8 font-serif">
+      <h1 className="text-3xl font-light text-nota-ink mb-2 font-serif">
         Panel de Administración
       </h1>
+      <p className="text-nota-mid mb-8">Rol: <strong>{user?.role}</strong></p>
 
       {/* Tabs */}
       <div className="flex gap-4 border-b border-nota-light mb-8">
