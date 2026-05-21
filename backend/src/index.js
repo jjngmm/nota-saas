@@ -6,6 +6,7 @@ const cors = require('cors');
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 const authRoutes = require('./routes/auth');
+const signupRoutes = require('./routes/signup');
 const doctorRoutes = require('./routes/doctors');   
 const patientRoutes = require('./routes/patients'); 
 const appointmentRoutes = require('./routes/appointments'); 
@@ -87,6 +88,7 @@ app.get('/api/test-db', async (req, res) => {
 // RUTAS DE NEGOCIO
 // ==========================================
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', signupRoutes);
 app.use('/api', doctorRoutes);
 app.use('/api', patientRoutes);
 app.use('/api', appointmentRoutes);
