@@ -5,6 +5,7 @@ import DashboardPage from "./pages/DashboardPage";
 import DoctorsPage from "./pages/DoctorsPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
 import PatientsPage from "./pages/PatientsPage";
+import AdminPanel from "./pages/AdminPanel";
 import "./styles/nota.css";
 import "./styles/appointments.css";
 import "./styles/patients.css";
@@ -23,7 +24,6 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-
           <Route
             path="/dashboard"
             element={
@@ -32,7 +32,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/doctors"
             element={
@@ -41,7 +40,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/appointments"
             element={
@@ -50,26 +48,22 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
-          <Route
-            path="/appointments/new"
-            element={
-              <ProtectedRoute>
-                <AppointmentsPage />
-              </ProtectedRoute>
-            }
-          />
-
           <Route
             path="/patients"
             element={
-              <ProtectedRoute roles={["secretary", "admin"]}>
+              <ProtectedRoute>
                 <PatientsPage />
               </ProtectedRoute>
             }
           />
-
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute roles={["secretary", "admin"]}>
+                <AdminPanel />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
