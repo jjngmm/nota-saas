@@ -174,7 +174,6 @@ router.post('/login', async (req, res) => {
 // ==========================================
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    // authMiddleware ya verificó el token y estableció req.user
     const { data: user, error } = await req.supabase
       .from('auth_users')
       .select('id, email, org_id, role')
@@ -203,14 +202,31 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-module.exports = router;
 // ==========================================
 // GET /auth/verify — Verificar token
 // ==========================================
 router.get('/verify', authMiddleware, async (req, res) => {
   try {
+    // Obtener usuario completo de la base de datos para incluir role
+    const { data: user, error } = await req.supabase
+      .from('auth_users')
+      .select('id, email, org_id, role')
+      .eq('id', req.user.userId)
+      .single();
+
+    if (error || !user) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+
     res.json({ 
-      user: req.user,
+      user: {
+        id: user.id,
+        email: user.email,
+        orgId: user.org_id,
+        role: user.role
+      },
       message: 'Token is valid' 
     });
   } catch (err) {
