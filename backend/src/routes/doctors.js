@@ -2,15 +2,16 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 
-// ==========================================
-// POST /api/doctors — Crear doctor
-// ==========================================
 router.post('/doctors', authMiddleware, async (req, res) => {
   try {
     const { first_name, last_name, specialty, license_number, phone, bio } = req.body;
-    const org_id = req.user.org_id;
+    
+    console.log('req.user:', req.user);
+    console.log('req.user.orgId:', req.user.orgId);
+    console.log('req.user.userId:', req.user.userId);
+    
+    const org_id = req.user.orgId;
 
-    // Validación
     if (!first_name || !last_name || !specialty || !license_number) {
       return res.status(400).json({
         error: 'Missing required fields',
@@ -18,7 +19,6 @@ router.post('/doctors', authMiddleware, async (req, res) => {
       });
     }
 
-    // Insertar doctor
     const { data, error } = await req.supabase
       .from('doctors')
       .insert([{
@@ -50,9 +50,6 @@ router.post('/doctors', authMiddleware, async (req, res) => {
   }
 });
 
-// ==========================================
-// GET /api/doctors — Listar doctors
-// ==========================================
 router.get('/doctors', authMiddleware, async (req, res) => {
   try {
     const org_id = req.user.orgId;
