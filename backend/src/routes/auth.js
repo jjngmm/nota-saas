@@ -235,3 +235,36 @@ router.get('/verify', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
+// ==========================================
+// POST /auth/refresh — Regenerar token
+// ==========================================
+router.post('/refresh', authMiddleware, async (req, res) => {
+  try {
+    // Obtener usuario actual de la BD
+    const { data: user, error } = await req.supabase
+      .from('auth_users')
+      .select('id, email, org_id, role')
+      .eq('id', req.user.userId)
+      .single();
+
+    if (error || !user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Generar nuevo token con rol actual
+    const newToken = generateToken(user.id, user.org_id, user.email);
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        orgId: user.org_id,
+        role: user.role
+      },
+      token: newToken
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
