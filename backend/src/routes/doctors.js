@@ -4,11 +4,10 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/doctors', authMiddleware, async (req, res) => {
   try {
-    // Solo admin puede crear doctors directamente
     if (req.user.role !== 'admin') {
       return res.status(403).json({
         error: 'Unauthorized',
-        details: 'Only admins can create doctors directly. Doctors must request approval.'
+        details: 'Only admins can create doctors directly'
       });
     }
 
@@ -16,10 +15,16 @@ router.post('/doctors', authMiddleware, async (req, res) => {
     const org_id = req.user.orgId;
     const user_id = req.user.userId;
 
+    console.log('=== DOCTOR CREATE DEBUG ===');
+    console.log('req.user:', JSON.stringify(req.user));
+    console.log('org_id variable:', org_id);
+    console.log('user_id variable:', user_id);
+    console.log('req.user.orgId:', req.user.orgId);
+    console.log('=========================');
+
     if (!first_name || !last_name || !specialty || !license_number) {
       return res.status(400).json({
-        error: 'Missing required fields',
-        details: 'first_name, last_name, specialty, and license_number are required'
+        error: 'Missing required fields'
       });
     }
 
@@ -28,10 +33,10 @@ router.post('/doctors', authMiddleware, async (req, res) => {
       .insert([{
         org_id: org_id,
         user_id: user_id,
-        first_name: first_name,
-        last_name: last_name,
-        specialty: specialty,
-        license_number: license_number,
+        first_name,
+        last_name,
+        specialty,
+        license_number,
         phone: phone || null,
         bio: bio || null,
         active: true
@@ -39,6 +44,7 @@ router.post('/doctors', authMiddleware, async (req, res) => {
       .select();
 
     if (error) {
+      console.log('Supabase error:', error);
       return res.status(400).json({
         error: 'Failed to create doctor',
         details: error.message
@@ -50,6 +56,7 @@ router.post('/doctors', authMiddleware, async (req, res) => {
       doctor: data[0]
     });
   } catch (err) {
+    console.log('Catch error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -57,7 +64,6 @@ router.post('/doctors', authMiddleware, async (req, res) => {
 router.get('/doctors', authMiddleware, async (req, res) => {
   try {
     const org_id = req.user.orgId;
-
     const { data, error } = await req.supabase
       .from('doctors')
       .select('*')
@@ -71,10 +77,7 @@ router.get('/doctors', authMiddleware, async (req, res) => {
       });
     }
 
-    res.json({
-      count: data.length,
-      doctors: data
-    });
+    res.json({ count: data.length, doctors: data });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
