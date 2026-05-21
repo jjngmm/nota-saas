@@ -8,7 +8,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 router.post('/patients', authMiddleware, async (req, res) => {
   try {
     const { first_name, last_name, email, phone, birth_date, blood_type, allergies, medical_history, notes } = req.body;
-    const org_id = req.user.org_id;
+    const org_id = req.user.orgId;
 
     // Validación
     if (!first_name || !last_name || !email) {
@@ -57,7 +57,7 @@ router.post('/patients', authMiddleware, async (req, res) => {
 // ==========================================
 router.get('/patients', authMiddleware, async (req, res) => {
   try {
-    const org_id = req.user.org_id;
+    const org_id = req.user.orgId;
 
     const { data, error } = await req.supabase
       .from('patients')
