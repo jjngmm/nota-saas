@@ -1,4 +1,3 @@
-cat > ~/nota-saas/backend/src/routes/signup.js << 'EOF'
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
@@ -11,7 +10,6 @@ router.post('/register', async (req, res) => {
   try {
     const { orgId, email, password, role, full_name, specialty, license_number } = req.body;
 
-    // Validación
     if (!orgId || !email || !password || !role) {
       return res.status(400).json({
         error: 'Missing required fields',
@@ -19,16 +17,14 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Roles válidos
     const validRoles = ['patient', 'doctor', 'secretary'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({
         error: 'Invalid role',
-        details: `Role must be one of: ${validRoles.join(', ')}`
+        details: 'Role must be one of: patient, doctor, secretary'
       });
     }
 
-    // Verificar que la organización existe
     const { data: org, error: orgError } = await req.supabase
       .from('organizations')
       .select('id')
@@ -36,12 +32,9 @@ router.post('/register', async (req, res) => {
       .single();
 
     if (orgError || !org) {
-      return res.status(404).json({
-        error: 'Organization not found'
-      });
+      return res.status(404).json({ error: 'Organization not found' });
     }
 
-    // Verificar que el email no existe en auth_users
     const { data: existingUser } = await req.supabase
       .from('auth_users')
       .select('id')
@@ -56,26 +49,8 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Verificar que no hay solicitud pendiente
-    const { data: existingRequest } = await req.supabase
-      .from('signup_requests')
-      .select('id')
-      .eq('org_id', orgId)
-      .eq('email', email)
-      .eq('status', 'pending')
-      .single();
-
-    if (existingRequest) {
-      return res.status(409).json({
-        error: 'Pending registration',
-        details: 'There is already a pending registration for this email'
-      });
-    }
-
-    // Hash de la password
     const passwordHash = await hashPassword(password);
 
-    // Si es paciente, crear directamente
     if (role === 'patient') {
       const { data: user, error: userError } = await req.supabase
         .from('auth_users')
@@ -110,7 +85,6 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Si es doctor o secretary, crear solicitud pendiente
     const { data: request, error: requestError } = await req.supabase
       .from('signup_requests')
       .insert([{
@@ -134,7 +108,7 @@ router.post('/register', async (req, res) => {
     }
 
     res.status(201).json({
-      message: `Registration request submitted. Awaiting ${role} approval.`,
+      message: 'Registration request submitted. Awaiting ' + role + ' approval.',
       request: {
         id: request.id,
         email: request.email,
@@ -150,14 +124,10 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// ==========================================
-// GET /api/auth/signup-requests — Listar solicitudes pendientes (admin)
-// ==========================================
 router.get('/signup-requests', authMiddleware, async (req, res) => {
   try {
     const org_id = req.user.orgId;
 
-    // Verificar que es admin o secretary
     if (!['admin', 'secretary'].includes(req.user.role)) {
       return res.status(403).json({
         error: 'Unauthorized',
@@ -188,14 +158,10 @@ router.get('/signup-requests', authMiddleware, async (req, res) => {
   }
 });
 
-// ==========================================
-// POST /api/auth/approve-signup — Aprobar solicitud (admin)
-// ==========================================
 router.post('/approve-signup/:requestId', authMiddleware, async (req, res) => {
   try {
     const { requestId } = req.params;
 
-    // Verificar que es admin o secretary
     if (!['admin', 'secretary'].includes(req.user.role)) {
       return res.status(403).json({
         error: 'Unauthorized',
@@ -203,7 +169,6 @@ router.post('/approve-signup/:requestId', authMiddleware, async (req, res) => {
       });
     }
 
-    // Obtener solicitud
     const { data: request, error: requestError } = await req.supabase
       .from('signup_requests')
       .select('*')
@@ -212,19 +177,16 @@ router.post('/approve-signup/:requestId', authMiddleware, async (req, res) => {
       .single();
 
     if (requestError || !request) {
-      return res.status(404).json({
-        error: 'Request not found'
-      });
+      return res.status(404).json({ error: 'Request not found' });
     }
 
     if (request.status !== 'pending') {
       return res.status(400).json({
         error: 'Request already processed',
-        details: `Status is ${request.status}`
+        details: 'Status is ' + request.status
       });
     }
 
-    // Crear usuario
     const { data: user, error: userError } = await req.supabase
       .from('auth_users')
       .insert([{
@@ -244,7 +206,6 @@ router.post('/approve-signup/:requestId', authMiddleware, async (req, res) => {
       });
     }
 
-    // Actualizar solicitud
     const { error: updateError } = await req.supabase
       .from('signup_requests')
       .update({ status: 'approved' })
@@ -258,7 +219,7 @@ router.post('/approve-signup/:requestId', authMiddleware, async (req, res) => {
     }
 
     res.json({
-      message: `${request.role} account approved and created`,
+      message: request.role + ' account approved and created',
       user: {
         id: user.id,
         email: user.email,
@@ -270,15 +231,11 @@ router.post('/approve-signup/:requestId', authMiddleware, async (req, res) => {
   }
 });
 
-// ==========================================
-// POST /api/auth/reject-signup — Rechazar solicitud (admin)
-// ==========================================
 router.post('/reject-signup/:requestId', authMiddleware, async (req, res) => {
   try {
     const { requestId } = req.params;
     const { reason } = req.body;
 
-    // Verificar que es admin o secretary
     if (!['admin', 'secretary'].includes(req.user.role)) {
       return res.status(403).json({
         error: 'Unauthorized',
@@ -286,7 +243,6 @@ router.post('/reject-signup/:requestId', authMiddleware, async (req, res) => {
       });
     }
 
-    // Obtener solicitud
     const { data: request, error: requestError } = await req.supabase
       .from('signup_requests')
       .select('*')
@@ -295,19 +251,16 @@ router.post('/reject-signup/:requestId', authMiddleware, async (req, res) => {
       .single();
 
     if (requestError || !request) {
-      return res.status(404).json({
-        error: 'Request not found'
-      });
+      return res.status(404).json({ error: 'Request not found' });
     }
 
     if (request.status !== 'pending') {
       return res.status(400).json({
         error: 'Request already processed',
-        details: `Status is ${request.status}`
+        details: 'Status is ' + request.status
       });
     }
 
-    // Actualizar solicitud
     const { error: updateError } = await req.supabase
       .from('signup_requests')
       .update({ status: 'rejected' })
@@ -330,4 +283,3 @@ router.post('/reject-signup/:requestId', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
-EOF
