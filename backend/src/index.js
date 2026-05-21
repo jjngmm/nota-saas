@@ -1,6 +1,3 @@
-// ==========================================
-// IMPORTACIONES
-// ==========================================
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -11,15 +8,9 @@ const doctorRoutes = require('./routes/doctors');
 const patientRoutes = require('./routes/patients'); 
 const appointmentRoutes = require('./routes/appointments'); 
 
-// ==========================================
-// INICIALIZAR EXPRESS
-// ==========================================
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ==========================================
-// INICIALIZAR SUPABASE
-// ==========================================
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 if (!supabaseUrl || !supabaseKey) {
@@ -29,29 +20,29 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 console.log('✅ Supabase initialized');
 
-// ==========================================
-// MIDDLEWARE
-// ==========================================
-app.use(cors({
+// CORS configuration
+const corsOptions = {
   origin: [
     'http://localhost:5173', 
     'http://localhost:3000',
     'https://nota-saas.vercel.app',
     'https://*.vercel.app'
   ],
-  credentials: true
-}));
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
 app.use(express.json());
 
-// Pasar supabase a todas las rutas
 app.use((req, res, next) => {
   req.supabase = supabase;
   next();
 });
 
-// ==========================================
-// ENDPOINTS DE PRUEBA
-// ==========================================
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
@@ -84,18 +75,12 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// ==========================================
-// RUTAS DE NEGOCIO
-// ==========================================
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', signupRoutes);
 app.use('/api', doctorRoutes);
 app.use('/api', patientRoutes);
 app.use('/api', appointmentRoutes);
 
-// ==========================================
-// ERROR HANDLING
-// ==========================================
 app.use((err, req, res, next) => {
   console.error('❌ Error:', err.message);
   res.status(500).json({ 
@@ -108,11 +93,8 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 
-// ==========================================
-// INICIAR SERVIDOR
-// ==========================================
 app.listen(PORT, () => {
   console.log(`✅ Nōta Backend running on http://localhost:${PORT}`);
   console.log(`✅ Health check: http://localhost:${PORT}/health`);
-  console.log(`✅ CORS enabled for localhost:5173, localhost:3000, and vercel`);
+  console.log(`✅ CORS enabled for vercel and localhost`);
 });
