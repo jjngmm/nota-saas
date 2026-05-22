@@ -71,7 +71,7 @@ export default function PatientRegister() {
         localStorage.setItem('user', JSON.stringify(response.data.user));
         setMessage('✓ Cuenta creada exitosamente. Redirigiendo...');
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/patient-portal');
         }, 1500);
       }
     } catch (err) {

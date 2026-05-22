@@ -6,6 +6,7 @@ import DashboardPage from "./pages/DashboardPage";
 import DoctorsPage from "./pages/DoctorsPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
 import PatientsPage from "./pages/PatientsPage";
+import PatientPortal from './pages/PatientPortal';
 import AdminPanel from "./pages/AdminPanel";
 import "./styles/nota.css";
 import "./styles/appointments.css";
@@ -26,6 +27,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register-patient" element={<PatientRegister />} />
+          <Route path="/patient-portal" element={<ProtectedRoute><PatientPortal /></ProtectedRoute>} />
           <Route
             path="/dashboard"
             element={
