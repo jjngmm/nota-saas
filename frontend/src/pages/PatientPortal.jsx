@@ -29,7 +29,7 @@ export default function PatientPortal() {
 
   const fetchDoctors = async () => {
     try {
-      const response = await api.get('/api/doctors');
+      const response = await api.get(`/api/doctors?orgId=${user?.orgId}`);
       setDoctors(response.data.doctors || []);
     } catch (err) {
       console.error('Error fetching doctors:', err);
