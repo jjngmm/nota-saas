@@ -1,22 +1,29 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import api from '../services/api';
 
 export default function PatientRegister() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const orgId = searchParams.get('clinic');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   
   const [formData, setFormData] = useState({
-    orgId: '',
     email: '',
     password: '',
     confirmPassword: '',
     first_name: '',
     last_name: ''
   });
+
+  useEffect(() => {
+    if (!orgId) {
+      setMessage('✗ Link de registro inválido. Contacta a tu clínica.');
+    }
+  }, [orgId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,7 +35,13 @@ export default function PatientRegister() {
     setLoading(true);
     setMessage('');
 
-    if (!formData.orgId || !formData.email || !formData.password || !formData.first_name || !formData.last_name) {
+    if (!orgId) {
+      setMessage('✗ Clínica no identificada');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.email || !formData.password || !formData.first_name || !formData.last_name) {
       setMessage('✗ Todos los campos son requeridos');
       setLoading(false);
       return;
@@ -48,7 +61,7 @@ export default function PatientRegister() {
 
     try {
       const response = await api.post('/api/auth/signup', {
-        orgId: formData.orgId,
+        orgId: orgId,
         email: formData.email,
         password: formData.password
       });
@@ -68,6 +81,24 @@ export default function PatientRegister() {
     }
   };
 
+  if (!orgId) {
+    return (
+      <div className="min-h-screen bg-nota-cream flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-nota-light">
+          <h1 className="text-3xl font-light text-center mb-2 text-nota-ink font-serif">
+            Nōta
+          </h1>
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+            ✗ Link de registro inválido
+          </div>
+          <p className="text-center text-nota-mid text-sm mt-4">
+            Contacta a tu clínica para obtener el link de registro correcto.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-nota-cream flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-nota-light">
@@ -75,7 +106,7 @@ export default function PatientRegister() {
           Nōta
         </h1>
         <p className="text-center text-nota-mid text-sm mb-8">
-          Registro de Pacientes
+          Crear Cuenta de Paciente
         </p>
 
         {message && (
@@ -89,15 +120,6 @@ export default function PatientRegister() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="ID de la Clínica"
-            name="orgId"
-            value={formData.orgId}
-            onChange={handleChange}
-            placeholder="UUID de tu clínica"
-            required
-          />
-
           <div className="grid grid-cols-2 gap-3">
             <Input
               label="Nombre"
