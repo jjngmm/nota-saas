@@ -7,6 +7,7 @@ const signupRoutes = require('./routes/signup');
 const doctorRoutes = require('./routes/doctors');   
 const patientRoutes = require('./routes/patients'); 
 const appointmentRoutes = require('./routes/appointments'); 
+const valeriaRoutes = require('./routes/valeria');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
