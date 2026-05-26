@@ -77,9 +77,10 @@ router.post('/setup-clinic', async (req, res) => {
 
 router.post('/consultar-disponibilidad', async (req, res) => {
   try {
-    const { especialidad, fecha_preferida, medico_preferido, org_id } = req.body;
+    const { especialidad, fecha_preferida, medico_preferido } = req.body;
+    const org_id = req.body.org_id || 'f22be1dc-c15d-46fc-b5f0-dee1e597d7e5';
 
-    if (!especialidad || !fecha_preferida || !org_id) {
+    if (!especialidad || !fecha_preferida) {
       return res.status(200).json({
         slots_disponibles: [],
         requiere_aclaracion: false,
