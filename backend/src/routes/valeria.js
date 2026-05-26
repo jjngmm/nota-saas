@@ -279,21 +279,34 @@ router.post('/registrar-cita', async (req, res) => {
   }
 });
 
-// DEBUG TEMPORAL - borrar después
 router.post('/debug', async (req, res) => {
-  const { org_id, doctor_id } = req.body;
+  const { org_id } = req.body;
   
   const { data: doctors } = await req.supabase
     .from('doctors')
     .select('id, first_name')
     .eq('org_id', org_id);
 
-  const { data: avail } = await req.supabase
+  const doctorIds = doctors.map(d => d.id);
+
+  const { data: avail, error: availError } = await req.supabase
     .from('doctor_availability')
     .select('*')
-    .in('doctor_id', doctors.map(d => d.id));
+    .in('doctor_id', doctorIds);
 
-  res.json({ doctors, avail });
+  // También probar con un ID directo
+  const { data: availDirect, error: directError } = await req.supabase
+    .from('doctor_availability')
+    .select('*')
+    .eq('doctor_id', 'ffee5d67-d552-4ae5-a4f3-b518fbc89feb');
+
+  res.json({ 
+    doctorIds,
+    avail, 
+    availError,
+    availDirect,
+    directError
+  });
 });
 
 module.exports = router;
