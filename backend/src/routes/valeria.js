@@ -279,4 +279,21 @@ router.post('/registrar-cita', async (req, res) => {
   }
 });
 
+// DEBUG TEMPORAL - borrar después
+router.post('/debug', async (req, res) => {
+  const { org_id, doctor_id } = req.body;
+  
+  const { data: doctors } = await req.supabase
+    .from('doctors')
+    .select('id, first_name')
+    .eq('org_id', org_id);
+
+  const { data: avail } = await req.supabase
+    .from('doctor_availability')
+    .select('*')
+    .in('doctor_id', doctors.map(d => d.id));
+
+  res.json({ doctors, avail });
+});
+
 module.exports = router;
