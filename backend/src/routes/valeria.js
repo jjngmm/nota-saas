@@ -1,22 +1,60 @@
 const express = require('express');
 const router = express.Router();
 
-// Normaliza texto: quita acentos y pone en minúsculas
 const normalize = (str) => {
   if (!str) return '';
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 };
 
-/**
- * POST /api/valeria/setup-clinic
- */
+const generarSlots = (doctors, availabilities, targetDate) => {
+  const slots = [];
+  const horarios = ['09:00', '11:00', '14:00', '16:00'];
+
+  for (const doc of doctors.slice(0, 2)) {
+    if (slots.length >= 3) break;
+    const avail = availabilities?.find(a => a.doctor_id === doc.id);
+    if (!avail) continue;
+
+    for (let i = 0; i < horarios.length && slots.length < 3; i++) {
+      const [hour, minute] = horarios[i].split(':').map(Number);
+      const slotTime = new Date(targetDate);
+      slotTime.setHours(hour, minute, 0, 0);
+
+      slots.push({
+        medico_key: `${normalize(doc.first_name)}_${normalize(doc.last_name)}`,
+        nombre_medico: `${doc.first_name} ${doc.last_name}`,
+        especialidad: doc.specialty,
+        fecha: slotTime.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+        hora: slotTime.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true }),
+        fecha_iso: slotTime.toISOString(),
+        disponible: true
+      });
+    }
+  }
+  return slots;
+};
+
+const parsearFecha = (fecha_preferida) => {
+  let targetDate = new Date();
+  const fechaNorm = normalize(fecha_preferida);
+  if (fechaNorm.includes('manana') || fechaNorm.includes('mañana')) {
+    targetDate.setDate(targetDate.getDate() + 1);
+  } else if (fechaNorm.includes('pasado')) {
+    targetDate.setDate(targetDate.getDate() + 2);
+  } else if (fechaNorm.includes('semana')) {
+    targetDate.setDate(targetDate.getDate() + 7);
+  } else {
+    const parsed = new Date(fecha_preferida);
+    if (!isNaN(parsed.getTime())) targetDate = parsed;
+  }
+  targetDate.setHours(0, 0, 0, 0);
+  return targetDate;
+};
+
 router.post('/setup-clinic', async (req, res) => {
   try {
     const { orgId, clinicName, twilioNumber, greeting } = req.body;
-
-    if (!orgId || !clinicName) {
-      return res.status(400).json({ error: 'Missing orgId or clinicName' });
-    }
+    if (!orgId || !clinicName) return res.status(400).json({ error: 'Missing orgId or clinicName' });
 
     const { data, error } = await req.supabase
       .from('clinic_vapi_config')
@@ -28,21 +66,15 @@ router.post('/setup-clinic', async (req, res) => {
         greeting_custom: greeting || `${clinicName}, buenos días, le habla Valeria. ¿En qué le puedo ayudar?`,
         active: true
       }])
-      .select()
-      .single();
+      .select().single();
 
     if (error) throw error;
-
     res.json({ success: true, mensaje: `Valeria configurada para ${clinicName}`, data });
   } catch (err) {
-    console.error('Error en setup-clinic:', err);
     res.status(500).json({ error: err.message, success: false });
   }
 });
 
-/**
- * POST /api/valeria/consultar-disponibilidad
- */
 router.post('/consultar-disponibilidad', async (req, res) => {
   try {
     const { especialidad, fecha_preferida, medico_preferido, org_id } = req.body;
@@ -51,27 +83,18 @@ router.post('/consultar-disponibilidad', async (req, res) => {
       return res.status(200).json({
         slots_disponibles: [],
         requiere_aclaracion: false,
-        mensaje: 'Faltan datos: especialidad, fecha_preferida y org_id son requeridos.'
+        mensaje: 'Faltan datos requeridos.'
       });
     }
 
-    // 1. Traer TODOS los médicos activos de la clínica
+    // 1. Traer TODOS los médicos activos
     const { data: allDoctors, error: doctorError } = await req.supabase
       .from('doctors')
       .select('id, first_name, last_name, specialty, active')
       .eq('org_id', org_id)
       .eq('active', true);
 
-    if (doctorError) {
-      console.error('Doctor query error:', doctorError);
-      return res.status(200).json({
-        slots_disponibles: [],
-        requiere_aclaracion: false,
-        mensaje: 'Disculpa, no puedo consultar disponibilidad en este momento.'
-      });
-    }
-
-    if (!allDoctors || allDoctors.length === 0) {
+    if (doctorError || !allDoctors || allDoctors.length === 0) {
       return res.status(200).json({
         slots_disponibles: [],
         requiere_aclaracion: false,
@@ -79,11 +102,10 @@ router.post('/consultar-disponibilidad', async (req, res) => {
       });
     }
 
-    // 2. Filtrar médicos por nombre O especialidad (sin acentos)
+    // 2. Filtrar por nombre o especialidad (sin acentos)
     let doctors = allDoctors;
 
     if (medico_preferido && medico_preferido.trim() !== '') {
-      // Filtrar por nombre del médico
       const searchTerm = normalize(medico_preferido);
       doctors = allDoctors.filter(d =>
         normalize(d.first_name).includes(searchTerm) ||
@@ -91,7 +113,6 @@ router.post('/consultar-disponibilidad', async (req, res) => {
         normalize(`${d.first_name} ${d.last_name}`).includes(searchTerm)
       );
     } else if (especialidad && normalize(especialidad) !== 'cualquiera') {
-      // Filtrar por especialidad (sin acentos)
       const searchTerm = normalize(especialidad);
       doctors = allDoctors.filter(d =>
         normalize(d.specialty).includes(searchTerm) ||
@@ -99,16 +120,15 @@ router.post('/consultar-disponibilidad', async (req, res) => {
       );
     }
 
-    // 3. Sin resultados
     if (doctors.length === 0) {
       return res.status(200).json({
         slots_disponibles: [],
         requiere_aclaracion: false,
-        mensaje: `No encontré médicos para "${especialidad}". ¿Podrías especificar otra especialidad o nombre de médico?`
+        mensaje: `No encontré médicos para "${especialidad}". ¿Otra especialidad o nombre?`
       });
     }
 
-    // 4. Múltiples médicos sin nombre específico → pedir aclaración
+    // 3. Si hay múltiples y no se especificó médico → pedir aclaración
     if (doctors.length > 1 && (!medico_preferido || medico_preferido.trim() === '')) {
       return res.status(200).json({
         slots_disponibles: [],
@@ -122,77 +142,25 @@ router.post('/consultar-disponibilidad', async (req, res) => {
       });
     }
 
-    // 5. Parsear fecha preferida
-    let targetDate = new Date();
-    const fechaNorm = normalize(fecha_preferida);
-
-    if (fechaNorm.includes('manana') || fechaNorm.includes('mañana')) {
-      targetDate.setDate(targetDate.getDate() + 1);
-    } else if (fechaNorm.includes('pasado')) {
-      targetDate.setDate(targetDate.getDate() + 2);
-    } else if (fechaNorm.includes('semana')) {
-      targetDate.setDate(targetDate.getDate() + 7);
-    } else {
-      const parsed = new Date(fecha_preferida);
-      if (!isNaN(parsed.getTime())) {
-        targetDate = parsed;
-      }
-    }
-
-    targetDate.setHours(0, 0, 0, 0);
-
-    // 6. Obtener disponibilidad de los médicos encontrados
+    // 4. Buscar disponibilidad
     const doctorIds = doctors.map(d => d.id);
-
     const { data: availabilities, error: availError } = await req.supabase
       .from('doctor_availability')
       .select('doctor_id, day_of_week, start_time, end_time, duration_minutes, is_available')
-      .in('doctor_id', doctorIds)
-      .eq('is_available', true);
+      .in('doctor_id', doctorIds);
 
     if (availError) {
-      console.error('Availability query error:', availError);
+      console.error('Availability error:', availError);
+      return res.status(200).json({
+        slots_disponibles: [],
+        requiere_aclaracion: false,
+        mensaje: 'No hay disponibilidad en esta fecha. ¿Prefieres otra fecha?'
+      });
     }
 
-    // 7. Generar slots
-    const slots = [];
-    const horarios = ['09:00', '11:00', '14:00', '16:00'];
-
-    for (const doc of doctors.slice(0, 2)) {
-      if (slots.length >= 3) break;
-
-      const avail = availabilities?.find(a => a.doctor_id === doc.id);
-      if (!avail) continue;
-
-      for (let i = 0; i < horarios.length && slots.length < 3; i++) {
-        const [hour, minute] = horarios[i].split(':').map(Number);
-        const slotTime = new Date(targetDate);
-        slotTime.setHours(hour, minute, 0, 0);
-
-        const fechaLegible = slotTime.toLocaleDateString('es-MX', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
-
-        const horaLegible = slotTime.toLocaleTimeString('es-MX', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        });
-
-        slots.push({
-          medico_key: `${normalize(doc.first_name)}_${normalize(doc.last_name)}`,
-          nombre_medico: `${doc.first_name} ${doc.last_name}`,
-          especialidad: doc.specialty,
-          fecha: fechaLegible,
-          hora: horaLegible,
-          fecha_iso: slotTime.toISOString(),
-          disponible: true
-        });
-      }
-    }
+    // 5. Generar slots
+    const targetDate = parsearFecha(fecha_preferida);
+    const slots = generarSlots(doctors, availabilities, targetDate);
 
     if (slots.length === 0) {
       return res.status(200).json({
@@ -219,22 +187,12 @@ router.post('/consultar-disponibilidad', async (req, res) => {
   }
 });
 
-/**
- * POST /api/valeria/registrar-cita
- */
 router.post('/registrar-cita', async (req, res) => {
   try {
     const {
-      medico_key,
-      fecha_iso,
-      paciente_nombre,
-      paciente_edad,
-      paciente_telefono,
-      especialidad,
-      confirmacion,
-      motivo,
-      duracion_minutos = 30,
-      org_id
+      medico_key, fecha_iso, paciente_nombre, paciente_edad,
+      paciente_telefono, especialidad, confirmacion,
+      motivo, duracion_minutos = 30, org_id
     } = req.body;
 
     if (!medico_key || !fecha_iso || !paciente_nombre || !confirmacion || !org_id) {
@@ -244,57 +202,40 @@ router.post('/registrar-cita', async (req, res) => {
       });
     }
 
-    // 1. Buscar médico por medico_key (sin acentos)
+    // 1. Buscar médico por medico_key normalizado
     const { data: allDoctors, error: docError } = await req.supabase
       .from('doctors')
       .select('id, first_name, last_name, specialty')
       .eq('org_id', org_id);
 
-    if (docError || !allDoctors || allDoctors.length === 0) {
-      return res.status(200).json({
-        success: false,
-        mensaje: 'No se encontró el médico. Por favor intenta de nuevo.'
-      });
+    if (docError || !allDoctors) {
+      return res.status(200).json({ success: false, mensaje: 'No se encontró el médico.' });
     }
 
-    // Buscar por medico_key normalizado
-    const doctor = allDoctors.find(d => {
-      const key = `${normalize(d.first_name)}_${normalize(d.last_name)}`;
-      return key === normalize(medico_key);
-    });
+    const doctor = allDoctors.find(d =>
+      `${normalize(d.first_name)}_${normalize(d.last_name)}` === normalize(medico_key)
+    );
 
     if (!doctor) {
       console.error('Doctor not found for key:', medico_key);
-      return res.status(200).json({
-        success: false,
-        mensaje: 'No se encontró el médico. Por favor intenta de nuevo.'
-      });
+      return res.status(200).json({ success: false, mensaje: 'No se encontró el médico. Por favor intenta de nuevo.' });
     }
 
     // 2. Crear paciente
     const nameParts = paciente_nombre.trim().split(' ');
-    const patientFirstName = nameParts[0];
-    const patientLastName = nameParts.slice(1).join(' ') || '';
-
-    const { data: patient, error: patientError } = await req.supabase
+    const { data: patient } = await req.supabase
       .from('patients')
       .insert([{
         org_id: org_id,
-        first_name: patientFirstName,
-        last_name: patientLastName,
+        first_name: nameParts[0],
+        last_name: nameParts.slice(1).join(' ') || '',
         phone: paciente_telefono || null,
         active: true
       }])
-      .select()
-      .single();
-
-    if (patientError) {
-      console.error('Error creating patient:', patientError);
-    }
+      .select().single();
 
     // 3. Crear cita
     const appointmentDate = new Date(fecha_iso);
-
     const { data: appointment, error: aptError } = await req.supabase
       .from('appointments')
       .insert([{
@@ -309,29 +250,15 @@ router.post('/registrar-cita', async (req, res) => {
         notes: `Agendado vía Valeria (canal: ${confirmacion})`,
         voice_call_id: req.headers['x-vapi-call-id'] || null
       }])
-      .select()
-      .single();
+      .select().single();
 
     if (aptError) {
       console.error('Error creating appointment:', aptError);
-      return res.status(200).json({
-        success: false,
-        mensaje: 'No se pudo agendar la cita. Por favor intenta más tarde.'
-      });
+      return res.status(200).json({ success: false, mensaje: 'No se pudo agendar la cita. Por favor intenta más tarde.' });
     }
 
-    // 4. Formato de fecha legible SIN AÑO
-    const fechaFormato = appointmentDate.toLocaleDateString('es-MX', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long'
-    });
-
-    const horaFormato = appointmentDate.toLocaleTimeString('es-MX', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
+    const fechaFormato = appointmentDate.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+    const horaFormato = appointmentDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
 
     res.json({
       success: true,
@@ -348,11 +275,7 @@ router.post('/registrar-cita', async (req, res) => {
 
   } catch (err) {
     console.error('Error en registrar-cita:', err);
-    res.status(500).json({
-      success: false,
-      mensaje: 'Disculpa, algo salió mal al agendar la cita.',
-      error: err.message
-    });
+    res.status(500).json({ success: false, mensaje: 'Disculpa, algo salió mal al agendar la cita.', error: err.message });
   }
 });
 
