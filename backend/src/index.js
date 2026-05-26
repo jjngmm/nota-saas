@@ -81,6 +81,8 @@ app.use('/api/auth', signupRoutes);
 app.use('/api', doctorRoutes);
 app.use('/api', patientRoutes);
 app.use('/api', appointmentRoutes);
+app.use('/api/valeria', valeriaRoutes);
+
 
 app.use((err, req, res, next) => {
   console.error('❌ Error:', err.message);
