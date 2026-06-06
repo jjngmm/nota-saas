@@ -8,6 +8,8 @@ const doctorRoutes = require('./routes/doctors');
 const patientRoutes = require('./routes/patients'); 
 const appointmentRoutes = require('./routes/appointments'); 
 const valeriaRoutes = require('./routes/valeria');
+const clinicalNotesRoutes = require('./routes/clinical_notes');
+const scribeRoutes = require('./routes/scribe');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -82,6 +84,8 @@ app.use('/api', doctorRoutes);
 app.use('/api', patientRoutes);
 app.use('/api', appointmentRoutes);
 app.use('/api/valeria', valeriaRoutes);
+app.use('/api', clinicalNotesRoutes);
+app.use('/api/scribe', scribeRoutes);
 
 
 app.use((err, req, res, next) => {

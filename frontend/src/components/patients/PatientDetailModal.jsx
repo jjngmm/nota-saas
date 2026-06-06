@@ -3,6 +3,7 @@ import api from "../../services/api";
 import GenderBadge from "../../components/ui/GenderBadge";
 import StatusBadge from "../../components/ui/StatusBadge";
 import Button from "../../components/ui/Button";
+import ClinicalNoteModal from "./ClinicalNoteModal";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -31,10 +32,14 @@ export default function PatientDetailModal({ patient, isSecretary, onClose, onEd
   const [appointments, setAppointments] = useState([]);
   const [loadingAppts, setLoadingAppts] = useState(true);
   const [activeTab, setActiveTab] = useState("info");
+  const [clinicalNotes, setClinicalNotes] = useState([]);
+  const [loadingNotes, setLoadingNotes] = useState(false);
+  const [openNote, setOpenNote] = useState(null);
   const age = calcAge(patient.date_of_birth);
 
   useEffect(() => {
     fetchAppointments();
+    fetchClinicalNotes();
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
@@ -53,12 +58,25 @@ export default function PatientDetailModal({ patient, isSecretary, onClose, onEd
     }
   }
 
+  async function fetchClinicalNotes() {
+    setLoadingNotes(true);
+    try {
+      const res = await api.get(`/clinical-notes/patient/${patient.id}`);
+      setClinicalNotes(res.data.data || []);
+    } catch {
+      // non-critical
+    } finally {
+      setLoadingNotes(false);
+    }
+  }
+
   function handleBackdrop(e) {
     if (e.target === e.currentTarget) onClose();
   }
 
   const TABS = [
     { id: "info", label: "Información" },
+    { id: "expediente", label: `Expediente (${clinicalNotes.length})` },
     { id: "appointments", label: `Citas (${appointments.length})` },
   ];
 
@@ -138,6 +156,38 @@ export default function PatientDetailModal({ patient, isSecretary, onClose, onEd
             </div>
           )}
 
+          {/* Tab: Expediente */}
+          {activeTab === "expediente" && (
+            <div>
+              {loadingNotes ? (
+                <p className="text-muted text-sm" style={{ padding: "20px 0" }}>Cargando expediente...</p>
+              ) : clinicalNotes.length === 0 ? (
+                <div className="empty-state" style={{ padding: "32px 0" }}>
+                  <p className="empty-title">Sin notas clínicas</p>
+                  <p className="empty-desc">Las notas clínicas aparecerán aquí después de cada consulta.</p>
+                </div>
+              ) : (
+                <div className="clinical-notes-list">
+                  {clinicalNotes.map((n) => (
+                    <div key={n.id} className="clinical-note-card" onClick={() => setOpenNote(n)}>
+                      <div className="clinical-note-card__info">
+                        <span className="clinical-note-card__date">
+                          {new Date(n.created_at).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}
+                        </span>
+                        <span className="clinical-note-card__doctor">
+                          {n.doctors ? `Dr. ${n.doctors.first_name} ${n.doctors.last_name}` : "—"}
+                        </span>
+                      </div>
+                      <span className={`note-status-badge note-status-badge--${n.status}`}>
+                        {n.status === "signed" ? "✓ Firmada" : "● Borrador"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Tab: Appointments */}
           {activeTab === "appointments" && (
             <div>
@@ -200,6 +250,17 @@ export default function PatientDetailModal({ patient, isSecretary, onClose, onEd
           )}
         </div>
       </div>
+
+      {openNote && (
+        <ClinicalNoteModal
+          note={openNote}
+          onClose={() => setOpenNote(null)}
+          onSaved={(updated) => {
+            setClinicalNotes((prev) => prev.map((n) => n.id === updated.id ? updated : n));
+            setOpenNote(updated);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -8,10 +8,12 @@ import AppointmentsPage from "./pages/AppointmentsPage";
 import PatientsPage from "./pages/PatientsPage";
 import PatientPortal from './pages/PatientPortal';
 import AdminPanel from "./pages/AdminPanel";
+import ClinicalNotePage from "./pages/ClinicalNotePage";
 import "./styles/nota.css";
 import "./styles/appointments.css";
 import "./styles/patients.css";
 import "./styles/dashboard.css";
+import "./styles/clinical_notes.css";
 
 function ProtectedRoute({ children, roles }) {
   const { user, token } = useAuth();
@@ -65,6 +67,14 @@ export default function App() {
             element={
               <ProtectedRoute roles={["secretary", "admin"]}>
                 <AdminPanel />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clinical-notes/:appointment_id"
+            element={
+              <ProtectedRoute>
+                <ClinicalNotePage />
               </ProtectedRoute>
             }
           />

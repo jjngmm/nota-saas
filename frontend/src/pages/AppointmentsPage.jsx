@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/layout/Sidebar";
@@ -25,6 +25,7 @@ const STATUS_OPTIONS = [
 export default function AppointmentsPage() {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -284,6 +285,7 @@ export default function AppointmentsPage() {
             setDetailAppointment(null);
             handleDelete(id);
           }}
+          onViewExpediente={(a) => navigate(`/clinical-notes/${a.id}`)}
         />
       )}
     </div>

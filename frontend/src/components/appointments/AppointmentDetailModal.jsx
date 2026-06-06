@@ -25,6 +25,7 @@ export default function AppointmentDetailModal({
   onClose,
   onEdit,
   onDelete,
+  onViewExpediente,
 }) {
   const isSecretary = userRole === "secretary" || userRole === "admin";
   const canModify =
@@ -88,6 +89,11 @@ export default function AppointmentDetailModal({
           <Button variant="ghost" onClick={onClose}>
             Cerrar
           </Button>
+          {onViewExpediente && (
+            <Button variant="secondary" onClick={() => onViewExpediente(appt)}>
+              Ver expediente
+            </Button>
+          )}
           {canModify && (
             <Button onClick={() => onEdit(appt)}>
               {isSecretary ? "Editar" : "Agregar notas"}
