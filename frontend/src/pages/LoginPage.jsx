@@ -9,7 +9,7 @@ export default function LoginPage() {
 
   const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', orgId: '' });
 
   // Org search
   const [orgQuery, setOrgQuery] = useState('');
@@ -83,7 +83,7 @@ export default function LoginPage() {
 
   async function handleLogin(e) {
     e.preventDefault();
-    const ok = await login(selectedOrg?.id || null, formData.email, formData.password);
+    const ok = await login(selectedOrg?.id || formData.orgId || null, formData.email, formData.password);
     if (ok) navigate('/dashboard');
   }
 
@@ -181,6 +181,22 @@ export default function LoginPage() {
                 </ul>
               )}
             </div>
+
+            {/* Fallback UUID — visible si no se seleccionó clínica del dropdown */}
+            {!selectedOrg && (
+              <div className="login-field">
+                <label className="login-label">Código de clínica <span style={{fontWeight:400, textTransform:'none', letterSpacing:0}}>(si no aparece en la búsqueda)</span></label>
+                <input
+                  className="login-input"
+                  type="text"
+                  name="orgId"
+                  value={formData.orgId}
+                  onChange={handleChange}
+                  placeholder="UUID de tu organización"
+                  autoComplete="off"
+                />
+              </div>
+            )}
 
             {/* Email */}
             <div className="login-field">
