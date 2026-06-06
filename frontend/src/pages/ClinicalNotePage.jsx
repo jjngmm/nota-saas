@@ -31,8 +31,8 @@ export default function ClinicalNotePage() {
     setLoading(true);
     try {
       const [noteRes, apptRes] = await Promise.all([
-        api.get(`/clinical-notes?appointment_id=${appointment_id}`),
-        api.get(`/appointments/${appointment_id}`),
+        api.get(`/api/clinical-notes?appointment_id=${appointment_id}`),
+        api.get(`/api/appointments/${appointment_id}`),
       ]);
       setNote(noteRes.data.data);
       setAppointment(apptRes.data);
@@ -47,7 +47,7 @@ export default function ClinicalNotePage() {
     if (!appointment) return;
     setCreating(true);
     try {
-      const res = await api.post('/clinical-notes', {
+      const res = await api.post('/api/clinical-notes', {
         appointment_id,
         patient_id: appointment.patient_id,
         doctor_id: appointment.doctor_id,
@@ -63,7 +63,7 @@ export default function ClinicalNotePage() {
   async function handleSave() {
     setSaving(true);
     try {
-      const res = await api.put(`/clinical-notes/${note.id}`, {
+      const res = await api.put(`/api/clinical-notes/${note.id}`, {
         subjective: note.subjective,
         objective: note.objective,
         assessment: note.assessment,
@@ -80,7 +80,7 @@ export default function ClinicalNotePage() {
   async function handleSign() {
     setSigning(true);
     try {
-      const res = await api.post(`/clinical-notes/${note.id}/sign`);
+      const res = await api.post(`/api/clinical-notes/${note.id}/sign`);
       setNote(res.data.data);
     } catch (err) {
       console.error(err);

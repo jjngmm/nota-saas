@@ -38,7 +38,7 @@ export default function ClinicalNoteModal({ note: initialNote, onClose, onSaved 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { data } = await api.put(`/clinical-notes/${note.id}`, {
+      const { data } = await api.put(`/api/clinical-notes/${note.id}`, {
         subjective: note.subjective,
         objective: note.objective,
         assessment: note.assessment,
@@ -56,7 +56,7 @@ export default function ClinicalNoteModal({ note: initialNote, onClose, onSaved 
   const handleSign = async () => {
     setSigning(true);
     try {
-      const { data } = await api.post(`/clinical-notes/${note.id}/sign`);
+      const { data } = await api.post(`/api/clinical-notes/${note.id}/sign`);
       setNote(data.data);
       onSaved?.(data.data);
     } catch (err) {
@@ -95,12 +95,12 @@ export default function ClinicalNoteModal({ note: initialNote, onClose, onSaved 
     reader.onloadend = async () => {
       const base64 = reader.result.split(',')[1];
       try {
-        const { data: txData } = await api.post('/scribe/transcribe', { audio: base64 });
+        const { data: txData } = await api.post('/api/scribe/transcribe', { audio: base64 });
         const transcript = txData.transcript;
         setNote((prev) => ({ ...prev, raw_transcript: transcript }));
 
         setScribeStatus('Generando nota SOAP...');
-        const { data: soapData } = await api.post('/scribe/generate-soap', {
+        const { data: soapData } = await api.post('/api/scribe/generate-soap', {
           transcript,
           note_id: note.id,
         });

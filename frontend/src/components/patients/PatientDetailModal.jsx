@@ -61,7 +61,7 @@ export default function PatientDetailModal({ patient, isSecretary, onClose, onEd
   async function fetchClinicalNotes() {
     setLoadingNotes(true);
     try {
-      const res = await api.get(`/clinical-notes/patient/${patient.id}`);
+      const res = await api.get(`/api/clinical-notes/patient/${patient.id}`);
       setClinicalNotes(res.data.data || []);
     } catch {
       // non-critical

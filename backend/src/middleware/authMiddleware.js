@@ -19,9 +19,6 @@ function authMiddleware(req, res, next) {
     });
   }
   
-  // Log para debuggear
-  console.log('Decoded JWT:', decoded);
-  
   req.user = decoded;
   next();
 }

@@ -4,21 +4,41 @@ const authMiddleware = require('../middleware/authMiddleware');
 const { hashPassword, comparePasswords, generateToken } = require('../utils/auth');
 
 // ==========================================
+// GET /auth/orgs?q=nombre — Buscar organización
+// ==========================================
+router.get('/orgs', async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.trim().length < 2) {
+      return res.json({ data: [] });
+    }
+
+    const { data, error } = await req.supabase
+      .from('organizations')
+      .select('id, name, city')
+      .ilike('name', `%${q.trim()}%`)
+      .eq('status', 'active')
+      .limit(8);
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({ data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
 // POST /auth/signup — Crear usuario
 // ==========================================
 router.post('/signup', async (req, res) => {
   try {
     const { orgId, email, password } = req.body;
 
-    // Validación
     if (!orgId || !email || !password) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        details: 'orgId, email, and password are required'
-      });
+      return res.status(400).json({ error: 'orgId, email y contraseña son requeridos' });
     }
 
-    // Verificar que la organización existe
     const { data: org, error: orgError } = await req.supabase
       .from('organizations')
       .select('id')
@@ -26,12 +46,9 @@ router.post('/signup', async (req, res) => {
       .single();
 
     if (orgError || !org) {
-      return res.status(404).json({
-        error: 'Organization not found'
-      });
+      return res.status(404).json({ error: 'Organización no encontrada' });
     }
 
-    // Verificar que el email no existe
     const { data: existingUser } = await req.supabase
       .from('auth_users')
       .select('id')
@@ -40,53 +57,30 @@ router.post('/signup', async (req, res) => {
       .single();
 
     if (existingUser) {
-      return res.status(409).json({
-        error: 'User already exists',
-        details: 'Email is already registered'
-      });
+      return res.status(409).json({ error: 'Este email ya está registrado en la organización' });
     }
 
-    // Hash de la password
     const passwordHash = await hashPassword(password);
 
-    // Crear usuario
     const { data: user, error: userError } = await req.supabase
       .from('auth_users')
-      .insert([{
-        org_id: orgId,
-        email,
-        password_hash: passwordHash,
-        role: 'secretary',
-        status: 'active'
-      }])
+      .insert([{ org_id: orgId, email, password_hash: passwordHash, role: 'secretary', status: 'active' }])
       .select()
       .single();
 
     if (userError) {
-      return res.status(500).json({
-        error: 'Failed to create user',
-        details: userError.message
-      });
+      return res.status(500).json({ error: 'Error al crear el usuario', details: userError.message });
     }
 
-    // Generar token
     const token = generateToken(user.id, orgId, email);
 
     res.status(201).json({
-      message: 'User created successfully',
-      user: {
-        id: user.id,
-        email: user.email,
-        orgId: user.org_id,
-        role: user.role
-      },
-      token
+      message: 'Usuario creado correctamente',
+      user: { id: user.id, email: user.email, orgId: user.org_id, role: user.role },
+      token,
     });
   } catch (err) {
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: err.message
-    });
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
@@ -97,28 +91,20 @@ router.post('/login', async (req, res) => {
   try {
     const { orgId, email, password } = req.body;
 
-    // Validación
     if (!orgId || !email || !password) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        details: 'orgId, email, and password are required'
-      });
+      return res.status(400).json({ error: 'orgId, email y contraseña son requeridos' });
     }
 
-    // Verificar que la organización existe
     const { data: org, error: orgError } = await req.supabase
       .from('organizations')
-      .select('id')
+      .select('id, name')
       .eq('id', orgId)
       .single();
 
     if (orgError || !org) {
-      return res.status(404).json({
-        error: 'Organization not found'
-      });
+      return res.status(404).json({ error: 'Organización no encontrada' });
     }
 
-    // Buscar usuario
     const { data: user, error: userError } = await req.supabase
       .from('auth_users')
       .select('*')
@@ -127,50 +113,32 @@ router.post('/login', async (req, res) => {
       .single();
 
     if (userError || !user) {
-      return res.status(401).json({
-        error: 'Invalid credentials'
-      });
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    // Verificar status
     if (user.status !== 'active') {
-      return res.status(403).json({
-        error: 'User account is inactive'
-      });
+      return res.status(403).json({ error: 'Esta cuenta está inactiva. Contacta al administrador.' });
     }
 
-    // Comparar contraseña
     const isPasswordValid = await comparePasswords(password, user.password_hash);
-
     if (!isPasswordValid) {
-      return res.status(401).json({
-        error: 'Invalid credentials'
-      });
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    // Generar token
     const token = generateToken(user.id, orgId, email);
 
     res.status(200).json({
-      message: 'Login successful',
-      user: {
-        id: user.id,
-        email: user.email,
-        orgId: user.org_id,
-        role: user.role
-      },
-      token
+      message: 'Sesión iniciada correctamente',
+      user: { id: user.id, email: user.email, orgId: user.org_id, role: user.role, orgName: org.name },
+      token,
     });
   } catch (err) {
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: err.message
-    });
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
 // ==========================================
-// GET /auth/me — Obtener usuario actual
+// GET /auth/me — Usuario actual
 // ==========================================
 router.get('/me', authMiddleware, async (req, res) => {
   try {
@@ -180,25 +148,11 @@ router.get('/me', authMiddleware, async (req, res) => {
       .eq('id', req.user.userId)
       .single();
 
-    if (error || !user) {
-      return res.status(404).json({
-        error: 'User not found'
-      });
-    }
+    if (error || !user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        orgId: user.org_id,
-        role: user.role
-      }
-    });
+    res.json({ user: { id: user.id, email: user.email, orgId: user.org_id, role: user.role } });
   } catch (err) {
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: err.message
-    });
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
@@ -207,64 +161,50 @@ router.get('/me', authMiddleware, async (req, res) => {
 // ==========================================
 router.get('/verify', authMiddleware, async (req, res) => {
   try {
-    // Obtener usuario completo de la base de datos para incluir role
     const { data: user, error } = await req.supabase
       .from('auth_users')
       .select('id, email, org_id, role')
       .eq('id', req.user.userId)
       .single();
 
-    if (error || !user) {
-      return res.status(404).json({
-        error: 'User not found'
-      });
-    }
+    if (error || !user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    res.json({ 
-      user: {
-        id: user.id,
-        email: user.email,
-        orgId: user.org_id,
-        role: user.role
-      },
-      message: 'Token is valid' 
+    const { data: org } = await req.supabase
+      .from('organizations')
+      .select('name')
+      .eq('id', user.org_id)
+      .single();
+
+    res.json({
+      user: { id: user.id, email: user.email, orgId: user.org_id, role: user.role, orgName: org?.name },
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ==========================================
+// POST /auth/refresh — Renovar token
+// ==========================================
+router.post('/refresh', authMiddleware, async (req, res) => {
+  try {
+    const { data: user, error } = await req.supabase
+      .from('auth_users')
+      .select('id, email, org_id, role')
+      .eq('id', req.user.userId)
+      .single();
+
+    if (error || !user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    const newToken = generateToken(user.id, user.org_id, user.email);
+
+    res.json({
+      user: { id: user.id, email: user.email, orgId: user.org_id, role: user.role },
+      token: newToken,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
 module.exports = router;
-
-// ==========================================
-// POST /auth/refresh — Regenerar token
-// ==========================================
-router.post('/refresh', authMiddleware, async (req, res) => {
-  try {
-    // Obtener usuario actual de la BD
-    const { data: user, error } = await req.supabase
-      .from('auth_users')
-      .select('id, email, org_id, role')
-      .eq('id', req.user.userId)
-      .single();
-
-    if (error || !user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Generar nuevo token con rol actual
-    const newToken = generateToken(user.id, user.org_id, user.email);
-
-    res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        orgId: user.org_id,
-        role: user.role
-      },
-      token: newToken
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
