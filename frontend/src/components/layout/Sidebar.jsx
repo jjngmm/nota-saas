@@ -64,10 +64,12 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar">
-      {/* Logo */}
+      {/* Logo — ō itálica en Cormorant Garamond (brand guidelines §04) */}
       <div className="sidebar-logo">
-        <span className="logo-mark">N</span>
-        <span className="logo-text">ōta</span>
+        <div className="sidebar-logo-mark">
+          <span>ō</span>
+        </div>
+        <span className="logo-text">N<em>ō</em>ta</span>
       </div>
 
       {/* Nav */}

@@ -3,25 +3,48 @@
    Fase 5 · Global Styles
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
 
-/* ── Variables ── */
+/* ── Brand Tokens (Nōta Identity v1.0) ── */
 :root {
-  --bg:          #f7f7f5;
+  /* Paleta oficial */
+  --ink:          #0D1117;
+  --ink-90:       #1A2128;
+  --ink-70:       #2A3A48;
+  --ink-40:       #6B7C80;
+  --ink-15:       #D8DCE0;
+  --ink-06:       #F0F1F3;
+
+  --cream:        #F7F5F0;
+  --cream-dark:   #EDE9E0;
+  --cream-mid:    #E8E3D8;
+
+  --forest:       #1B3A2A;
+  --forest-mid:   #2D5A3D;
+  --forest-soft:  #EAF0EB;
+  --forest-lite:  #C8DCCB;
+  --forest-mute:  #5A7066;
+
+  --accent-teal:  #A8C4B0;
+
+  /* Alias semánticos — mapped to brand palette */
+  --bg:          var(--cream);
   --surface:     #ffffff;
-  --surface-2:   #f2f2ef;
-  --border:      #e8e8e3;
-  --border-2:    #d4d4cc;
-  --text:        #1a1a18;
-  --text-2:      #6b6b63;
-  --text-3:      #9b9b91;
+  --surface-2:   var(--cream-dark);
+  --border:      var(--cream-mid);
+  --border-2:    var(--ink-15);
+  --text:        var(--ink);
+  --text-2:      var(--ink-40);
+  --text-3:      var(--forest-mute);
 
-  --accent:      #2563eb;
-  --accent-soft: #eff4ff;
-  --accent-2:    #1d4ed8;
+  /* Acento principal: Forest Mid (NO azul per brand guidelines) */
+  --accent:      var(--forest-mid);
+  --accent-soft: var(--forest-soft);
+  --accent-2:    var(--forest);
 
-  --success:     #16a34a;
-  --success-soft:#f0fdf4;
+  /* Estados semánticos */
+  --success:     var(--forest-mid);
+  --success-soft: var(--forest-soft);
   --warning:     #d97706;
   --warning-soft:#fffbeb;
   --error:       #dc2626;
@@ -36,6 +59,7 @@
   --shadow-lg:   0 16px 40px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
 
   --font:        'DM Sans', system-ui, sans-serif;
+  --font-serif:  'Cormorant Garamond', Georgia, serif;
   --font-mono:   'DM Mono', monospace;
 }
 
@@ -94,6 +118,28 @@ img { display: block; max-width: 100%; }
   border-bottom: 1px solid var(--border);
 }
 
+/* Logomark: ō itálica en Cormorant Garamond — ver brand guidelines §04 */
+.sidebar-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-logo-mark span {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 22px;
+  color: var(--cream);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
 .logo-mark {
   font-family: var(--font);
   font-size: 22px;
@@ -103,10 +149,15 @@ img { display: block; max-width: 100%; }
 }
 
 .logo-text {
-  font-size: 22px;
+  font-family: var(--font-serif);
   font-weight: 300;
+  font-size: 22px;
   color: var(--text);
   letter-spacing: -0.5px;
+}
+
+.logo-text em {
+  font-style: italic;
 }
 
 .sidebar-nav {
@@ -212,10 +263,12 @@ img { display: block; max-width: 100%; }
 }
 
 .page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.3px;
-  color: var(--text);
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: 1.9rem;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  line-height: 1.1;
 }
 
 .page-subtitle {
@@ -335,7 +388,7 @@ img { display: block; max-width: 100%; }
 
 .input-field--icon .input-el { padding-left: 34px; }
 .input-el::placeholder { color: var(--text-3); }
-.input-el:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.input-el:focus { border-color: var(--forest-mid); box-shadow: 0 0 0 3px rgba(45,90,61,.1); }
 .input-field--error .input-el { border-color: var(--error); }
 .input-error-msg { font-size: 0.78rem; color: var(--error); }
 
@@ -503,8 +556,8 @@ img { display: block; max-width: 100%; }
   white-space: nowrap;
 }
 
-.badge--blue    { background: #eff6ff; color: #1d4ed8; }
-.badge--green   { background: #f0fdf4; color: #15803d; }
+.badge--blue    { background: var(--forest-soft); color: var(--forest-mid); }
+.badge--green   { background: var(--forest-soft); color: var(--forest-mid); }
 .badge--red     { background: #fef2f2; color: #b91c1c; }
 .badge--purple  { background: #faf5ff; color: #7e22ce; }
 .badge--orange  { background: #fff7ed; color: #c2410c; }
@@ -598,7 +651,13 @@ img { display: block; max-width: 100%; }
   border-bottom: 1px solid var(--border);
 }
 
-.modal-title { font-size: 1rem; font-weight: 600; }
+.modal-title {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: 1.4rem;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+}
 .modal-subtitle { font-size: 0.82rem; color: var(--text-2); margin-top: 3px; }
 
 .modal-close {

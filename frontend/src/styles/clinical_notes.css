@@ -1,5 +1,5 @@
-/* =============================================
-   Clinical Notes — Expediente Clínico
+﻿/* =============================================
+   Clinical Notes â€” Expediente ClÃ­nico
    ============================================= */
 
 .clinical-note-modal-overlay {
@@ -14,7 +14,7 @@
 }
 
 .clinical-note-modal {
-  background: var(--nota-cream, #faf8f5);
+  background: var(--cream);
   border-radius: 12px;
   width: 100%;
   max-width: 780px;
@@ -27,14 +27,14 @@
 
 .clinical-note-modal__header {
   padding: 1.5rem 2rem 1rem;
-  border-bottom: 1px solid var(--nota-sand, #e8e4dd);
+  border-bottom: 1px solid var(--cream-mid);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   position: sticky;
   top: 0;
-  background: var(--nota-cream, #faf8f5);
+  background: var(--cream);
   z-index: 1;
 }
 
@@ -42,14 +42,14 @@
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.6rem;
   font-weight: 600;
-  color: var(--nota-ink, #1a1a2e);
+  color: var(--ink);
   line-height: 1.2;
   margin: 0;
 }
 
 .clinical-note-modal__meta {
   font-size: 0.82rem;
-  color: var(--nota-muted, #888);
+  color: var(--ink-40);
   margin-top: 0.25rem;
 }
 
@@ -57,7 +57,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--nota-muted, #888);
+  color: var(--ink-40);
   font-size: 1.4rem;
   line-height: 1;
   padding: 0.25rem;
@@ -65,7 +65,7 @@
 }
 
 .clinical-note-modal__close:hover {
-  color: var(--nota-ink, #1a1a2e);
+  color: var(--ink);
 }
 
 .clinical-note-modal__body {
@@ -86,7 +86,7 @@
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 600;
-  color: var(--nota-forest, #2d5a3d);
+  color: var(--forest-mid);
   letter-spacing: 0.01em;
   display: flex;
   align-items: center;
@@ -97,10 +97,10 @@
   font-family: system-ui, sans-serif;
   font-size: 0.72rem;
   font-weight: 500;
-  color: var(--nota-muted, #888);
+  color: var(--ink-40);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: var(--nota-sand, #e8e4dd);
+  background: var(--cream-mid);
   padding: 0.15rem 0.5rem;
   border-radius: 4px;
 }
@@ -109,12 +109,12 @@
   width: 100%;
   min-height: 90px;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--nota-sand, #e8e4dd);
+  border: 1px solid var(--cream-mid);
   border-radius: 8px;
   background: #fff;
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 0.9rem;
-  color: var(--nota-ink, #1a1a2e);
+  color: var(--ink);
   line-height: 1.6;
   resize: vertical;
   transition: border-color 0.2s;
@@ -123,25 +123,25 @@
 
 .soap-section textarea:focus {
   outline: none;
-  border-color: var(--nota-forest, #2d5a3d);
+  border-color: var(--forest-mid);
 }
 
 .soap-section textarea:read-only {
-  background: var(--nota-cream, #faf8f5);
-  color: var(--nota-muted, #888);
+  background: var(--cream);
+  color: var(--ink-40);
   cursor: default;
 }
 
 /* Transcript section */
 .transcript-section {
-  border-top: 1px solid var(--nota-sand, #e8e4dd);
+  border-top: 1px solid var(--cream-mid);
   padding-top: 1.25rem;
 }
 
 .transcript-section__label {
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--nota-muted, #888);
+  color: var(--ink-40);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
@@ -149,11 +149,11 @@
 
 .transcript-section__text {
   background: #fff;
-  border: 1px solid var(--nota-sand, #e8e4dd);
+  border: 1px solid var(--cream-mid);
   border-radius: 8px;
   padding: 0.75rem 1rem;
   font-size: 0.85rem;
-  color: var(--nota-ink, #1a1a2e);
+  color: var(--ink);
   line-height: 1.6;
   max-height: 150px;
   overflow-y: auto;
@@ -172,13 +172,14 @@
 }
 
 .note-status-badge--draft {
-  background: #f0f0f0;
-  color: #666;
+  background: var(--ink-06, #F0F1F3);
+  color: var(--ink-40);
 }
 
 .note-status-badge--signed {
-  background: #e8f5e9;
-  color: #2d5a3d;
+  background: var(--forest-soft);
+  color: var(--forest-mid);
+  border: 0.5px solid var(--forest-lite);
 }
 
 /* Recording UI */
@@ -188,7 +189,7 @@
   gap: 0.75rem;
   padding: 1rem;
   background: #fff;
-  border: 1px solid var(--nota-sand, #e8e4dd);
+  border: 1px solid var(--cream-mid);
   border-radius: 8px;
 }
 
@@ -206,7 +207,7 @@
 }
 
 .scribe-bar__record-btn--idle {
-  background: var(--nota-forest, #2d5a3d);
+  background: var(--forest-mid);
   color: #fff;
 }
 
@@ -215,7 +216,7 @@
 }
 
 .scribe-bar__record-btn--recording {
-  background: #dc2626;
+  background: var(--error);
   color: #fff;
 }
 
@@ -238,13 +239,13 @@
 
 .scribe-bar__status {
   font-size: 0.82rem;
-  color: var(--nota-muted, #888);
+  color: var(--ink-40);
 }
 
 /* Footer actions */
 .clinical-note-modal__footer {
   padding: 1rem 2rem 1.5rem;
-  border-top: 1px solid var(--nota-sand, #e8e4dd);
+  border-top: 1px solid var(--cream-mid);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -267,7 +268,7 @@
 
 .clinical-note-card {
   background: #fff;
-  border: 1px solid var(--nota-sand, #e8e4dd);
+  border: 1px solid var(--cream-mid);
   border-radius: 8px;
   padding: 1rem 1.25rem;
   cursor: pointer;
@@ -279,7 +280,7 @@
 }
 
 .clinical-note-card:hover {
-  border-color: var(--nota-forest, #2d5a3d);
+  border-color: var(--forest-mid);
   box-shadow: 0 2px 8px rgba(45, 90, 61, 0.1);
 }
 
@@ -292,12 +293,12 @@
 .clinical-note-card__date {
   font-weight: 600;
   font-size: 0.9rem;
-  color: var(--nota-ink, #1a1a2e);
+  color: var(--ink);
 }
 
 .clinical-note-card__doctor {
   font-size: 0.82rem;
-  color: var(--nota-muted, #888);
+  color: var(--ink-40);
 }
 
 /* ClinicalNotePage */
@@ -312,7 +313,7 @@
   align-items: center;
   gap: 0.4rem;
   font-size: 0.875rem;
-  color: var(--nota-forest, #2d5a3d);
+  color: var(--forest-mid);
   text-decoration: none;
   margin-bottom: 1.5rem;
   cursor: pointer;
@@ -333,13 +334,13 @@
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 2rem;
   font-weight: 600;
-  color: var(--nota-ink, #1a1a2e);
+  color: var(--ink);
   margin: 0 0 0.5rem;
 }
 
 .clinical-note-page__meta {
   font-size: 0.875rem;
-  color: var(--nota-muted, #888);
+  color: var(--ink-40);
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
@@ -350,3 +351,4 @@
   flex-direction: column;
   gap: 2rem;
 }
+

@@ -22,28 +22,31 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* Stat numbers en Cormorant Garamond — brand guidelines §03 */
 .stat-value {
-  font-size: 1.75rem;
-  font-weight: 600;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 300;
   letter-spacing: -0.5px;
   line-height: 1;
 }
 
 .stat-label {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-3);
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
-.stat--neutral .stat-value { color: var(--text); }
-.stat--blue    .stat-value { color: #1d4ed8; }
-.stat--green   .stat-value { color: #15803d; }
+/* Paleta de estados — Forest Mid como positivo, no azul */
+.stat--neutral .stat-value { color: var(--ink, #0D1117); }
+.stat--blue    .stat-value { color: var(--forest-mid, #2D5A3D); }
+.stat--green   .stat-value { color: var(--forest-mid, #2D5A3D); }
 .stat--red     .stat-value { color: #b91c1c; }
 
-.stat--blue  { border-left: 3px solid #3b82f6; }
-.stat--green { border-left: 3px solid #22c55e; }
+.stat--blue  { border-left: 3px solid var(--forest-lite, #C8DCCB); }
+.stat--green { border-left: 3px solid var(--forest-mid, #2D5A3D); }
 .stat--red   { border-left: 3px solid #ef4444; }
 
 /* ── Filters Bar ── */
@@ -173,7 +176,7 @@
 
 .select-el:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+  box-shadow: 0 0 0 3px rgba(45,90,61,.1);
 }
 
 .select-el--error { border-color: var(--error); }
@@ -199,7 +202,7 @@
 .textarea-el::placeholder { color: var(--text-3); }
 .textarea-el:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+  box-shadow: 0 0 0 3px rgba(45,90,61,.1);
 }
 
 .textarea-el:disabled {
