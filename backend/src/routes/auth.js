@@ -91,24 +91,50 @@ router.post('/login', async (req, res) => {
   try {
     const { orgId, email, password } = req.body;
 
-    if (!orgId || !email || !password) {
-      return res.status(400).json({ error: 'orgId, email y contraseña son requeridos' });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email y contraseña son requeridos' });
     }
 
-    const { data: org, error: orgError } = await req.supabase
-      .from('organizations')
-      .select('id, name')
-      .eq('id', orgId)
-      .single();
+    let resolvedOrgId = orgId;
+    let org = null;
 
-    if (orgError || !org) {
-      return res.status(404).json({ error: 'Organización no encontrada' });
+    if (resolvedOrgId) {
+      // Verificar org por ID
+      const { data: orgData, error: orgError } = await req.supabase
+        .from('organizations')
+        .select('id, name')
+        .eq('id', resolvedOrgId)
+        .single();
+      if (orgError || !orgData) {
+        return res.status(404).json({ error: 'Organización no encontrada' });
+      }
+      org = orgData;
+    } else {
+      // Sin orgId: buscar usuario por email en cualquier org
+      const { data: users } = await req.supabase
+        .from('auth_users')
+        .select('*, organizations(id, name)')
+        .eq('email', email)
+        .eq('status', 'active');
+
+      if (!users || users.length === 0) {
+        return res.status(401).json({ error: 'Credenciales incorrectas' });
+      }
+      if (users.length > 1) {
+        // Email en múltiples orgs — pedir que especifique clínica
+        return res.status(409).json({
+          error: 'Este email existe en varias clínicas. Selecciona tu clínica para continuar.',
+          requiresOrg: true,
+        });
+      }
+      resolvedOrgId = users[0].org_id;
+      org = users[0].organizations;
     }
 
     const { data: user, error: userError } = await req.supabase
       .from('auth_users')
       .select('*')
-      .eq('org_id', orgId)
+      .eq('org_id', resolvedOrgId)
       .eq('email', email)
       .single();
 
@@ -125,11 +151,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    const token = generateToken(user.id, orgId, email);
+    const token = generateToken(user.id, resolvedOrgId, email);
 
     res.status(200).json({
       message: 'Sesión iniciada correctamente',
-      user: { id: user.id, email: user.email, orgId: user.org_id, role: user.role, orgName: org.name },
+      user: { id: user.id, email: user.email, orgId: user.org_id, role: user.role, orgName: org?.name },
       token,
     });
   } catch (err) {

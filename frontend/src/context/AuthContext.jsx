@@ -66,7 +66,9 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await api.post('/api/auth/login', { orgId, email, password });
+      const body = { email, password };
+      if (orgId) body.orgId = orgId;
+      const res = await api.post('/api/auth/login', body);
       const { token: newToken, user: userData } = res.data;
       setToken(newToken);
       setUser(userData);

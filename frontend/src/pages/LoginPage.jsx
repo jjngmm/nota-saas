@@ -83,8 +83,7 @@ export default function LoginPage() {
 
   async function handleLogin(e) {
     e.preventDefault();
-    if (!selectedOrg) return;
-    const ok = await login(selectedOrg.id, formData.email, formData.password);
+    const ok = await login(selectedOrg?.id || null, formData.email, formData.password);
     if (ok) navigate('/dashboard');
   }
 
@@ -115,7 +114,8 @@ export default function LoginPage() {
     setError?.(null);
   }
 
-  const isFormValid = selectedOrg && formData.email && formData.password;
+  // La clínica es opcional — el backend la resuelve por email si es única
+  const isFormValid = formData.email && formData.password;
 
   return (
     <div className="login-page">
