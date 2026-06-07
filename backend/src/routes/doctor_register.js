@@ -47,7 +47,7 @@ router.post('/doctor-register', async (req, res) => {
     const orgName = `Consultorio ${first_name} ${last_name}`;
     const { data: org, error: orgError } = await req.supabase
       .from('organizations')
-      .insert({ name: orgName, status: 'active' })
+      .insert({ name: orgName, email, phone: phone || null, status: 'active' })
       .select()
       .single();
 
