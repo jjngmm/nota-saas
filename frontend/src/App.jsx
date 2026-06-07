@@ -9,11 +9,13 @@ import PatientsPage from "./pages/PatientsPage";
 import PatientPortal from './pages/PatientPortal';
 import AdminPanel from "./pages/AdminPanel";
 import ClinicalNotePage from "./pages/ClinicalNotePage";
+import DoctorRegisterPage from "./pages/DoctorRegisterPage";
 import "./styles/nota.css";
 import "./styles/appointments.css";
 import "./styles/patients.css";
 import "./styles/dashboard.css";
 import "./styles/clinical_notes.css";
+import "./styles/register.css";
 
 function ProtectedRoute({ children, roles }) {
   const { user, token } = useAuth();
@@ -28,6 +30,7 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/registro" element={<DoctorRegisterPage />} />
           <Route path="/register-patient" element={<PatientRegister />} />
           <Route path="/patient-portal" element={<ProtectedRoute><PatientPortal /></ProtectedRoute>} />
           <Route

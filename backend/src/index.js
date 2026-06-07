@@ -9,6 +9,7 @@ const patientRoutes = require('./routes/patients');
 const appointmentRoutes = require('./routes/appointments'); 
 const valeriaRoutes = require('./routes/valeria');
 const clinicalNotesRoutes = require('./routes/clinical_notes');
+const doctorRegisterRoutes = require('./routes/doctor_register');
 const scribeRoutes = require('./routes/scribe');
 
 const app = express();
@@ -80,6 +81,7 @@ app.get('/api/test-db', async (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', signupRoutes);
+app.use('/api/auth', doctorRegisterRoutes);
 app.use('/api', doctorRoutes);
 app.use('/api', patientRoutes);
 app.use('/api', appointmentRoutes);

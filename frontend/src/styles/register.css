@@ -1,0 +1,344 @@
+/* ============================================================
+   Nōta — Doctor Register Page
+   ============================================================ */
+
+.register-page {
+  min-height: 100vh;
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header mínimo */
+.register-header {
+  padding: 1.25rem 2rem;
+  border-bottom: 0.5px solid var(--cream-mid);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+}
+
+.register-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.register-header__mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-header__mark span {
+  font-family: var(--font-serif, 'Cormorant Garamond', Georgia, serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 20px;
+  color: var(--cream);
+  line-height: 1;
+}
+
+.register-header__name {
+  font-family: var(--font-serif, 'Cormorant Garamond', Georgia, serif);
+  font-weight: 300;
+  font-size: 1.35rem;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+}
+
+.register-header__name em { font-style: italic; }
+
+.register-header__login {
+  font-size: 0.85rem;
+  color: var(--ink-40);
+}
+
+.register-header__login a {
+  color: var(--forest-mid);
+  font-weight: 500;
+  text-decoration: none;
+  margin-left: 0.3rem;
+}
+
+.register-header__login a:hover { text-decoration: underline; }
+
+/* Main */
+.register-main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1.5rem 4rem;
+}
+
+.register-card {
+  background: var(--surface);
+  border: 0.5px solid var(--cream-mid);
+  border-radius: 16px;
+  padding: 2.5rem 2.5rem 2rem;
+  width: 100%;
+  max-width: 640px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.register-card__heading {
+  margin-bottom: 0.4rem;
+}
+
+.register-card__title {
+  font-family: var(--font-serif, 'Cormorant Garamond', Georgia, serif);
+  font-weight: 300;
+  font-size: 1.9rem;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.register-card__sub {
+  font-size: 0.875rem;
+  color: var(--ink-40);
+  margin-top: 0.35rem;
+  margin-bottom: 2rem;
+}
+
+/* Form grid */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.register-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.register-row--3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.register-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.register-field--full {
+  grid-column: 1 / -1;
+}
+
+.register-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-40);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.register-label sup {
+  color: var(--error, #dc2626);
+  margin-left: 1px;
+}
+
+.register-input,
+.register-select {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--cream-mid);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: var(--surface);
+  font-family: var(--font, 'DM Sans', sans-serif);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.register-input:focus,
+.register-select:focus {
+  outline: none;
+  border-color: var(--forest-mid);
+  box-shadow: 0 0 0 3px rgba(45,90,61,.1);
+}
+
+.register-input::placeholder { color: var(--ink-15); }
+
+.register-select-wrap {
+  position: relative;
+}
+
+.register-select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-40);
+  font-size: 0.75rem;
+  pointer-events: none;
+}
+
+/* Password */
+.register-password-wrap {
+  position: relative;
+}
+
+.register-password-wrap .register-input {
+  padding-right: 2.5rem;
+}
+
+.register-password-toggle {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--ink-40);
+  padding: 0.2rem;
+  line-height: 1;
+}
+
+.register-password-toggle:hover { color: var(--ink); }
+
+/* Divider */
+.register-divider {
+  height: 0.5px;
+  background: var(--cream-mid);
+  margin: 0.5rem 0;
+}
+
+/* Checkboxes */
+.register-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.register-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  cursor: pointer;
+}
+
+.register-check input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--cream-mid);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: var(--forest-mid);
+}
+
+.register-check__text {
+  font-size: 0.83rem;
+  color: var(--ink-40);
+  line-height: 1.5;
+}
+
+.register-check__text a {
+  color: var(--forest-mid);
+  font-weight: 500;
+}
+
+/* Error */
+.register-error {
+  background: var(--error-soft, #fef2f2);
+  border: 1px solid #fecaca;
+  color: var(--error, #dc2626);
+  font-size: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+}
+
+/* Submit */
+.register-submit {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: var(--forest-mid);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font, 'DM Sans', sans-serif);
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  margin-top: 0.5rem;
+}
+
+.register-submit:hover:not(:disabled) { background: var(--forest); }
+.register-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Success */
+.register-success {
+  text-align: center;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.register-success__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--forest-soft);
+  border: 0.5px solid var(--forest-lite);
+  color: var(--forest-mid);
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-success__title {
+  font-family: var(--font-serif, 'Cormorant Garamond', Georgia, serif);
+  font-weight: 300;
+  font-size: 1.7rem;
+  color: var(--ink);
+}
+
+.register-success__desc {
+  font-size: 0.9rem;
+  color: var(--ink-40);
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+.register-success__btn {
+  padding: 0.7rem 1.75rem;
+  background: var(--forest-mid);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 0.5rem;
+  transition: background 0.15s;
+}
+
+.register-success__btn:hover { background: var(--forest); }
+
+@media (max-width: 600px) {
+  .register-card { padding: 1.75rem 1.25rem; }
+  .register-row, .register-row--3 { grid-template-columns: 1fr; }
+}

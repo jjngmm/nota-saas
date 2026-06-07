@@ -257,11 +257,8 @@ export default function LoginPage() {
 
             {/* Switch mode */}
             <p className="login-switch">
-              {mode === 'login' ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}
-              {' '}
-              <button type="button" className="login-switch__link" onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}>
-                {mode === 'login' ? 'Regístrate' : 'Inicia sesión'}
-              </button>
+              ¿Eres médico y quieres unirte?{' '}
+              <a href="/registro" className="login-switch__link">Crea tu cuenta</a>
             </p>
           </form>
         )}
