@@ -28,14 +28,19 @@ function getInitials(name = "") {
   return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 }
 
-export default function PatientDetailModal({ patient, isSecretary, onClose, onEdit, onDelete }) {
+export default function PatientDetailModal({ patient: rawPatient, isSecretary, onClose, onEdit, onDelete }) {
+  // Normalizar el paciente para compatibilidad con campos viejos y nuevos
+  const patient = {
+    ...rawPatient,
+    full_name: rawPatient.full_name || [rawPatient.first_name, rawPatient.last_name, rawPatient.last_name_maternal].filter(Boolean).join(' '),
+  };
   const [appointments, setAppointments] = useState([]);
   const [loadingAppts, setLoadingAppts] = useState(true);
   const [activeTab, setActiveTab] = useState("info");
   const [clinicalNotes, setClinicalNotes] = useState([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [openNote, setOpenNote] = useState(null);
-  const age = calcAge(patient.date_of_birth);
+  const age = calcAge(patient.birth_date || patient.date_of_birth);
 
   useEffect(() => {
     fetchAppointments();
@@ -124,34 +129,56 @@ export default function PatientDetailModal({ patient, isSecretary, onClose, onEd
             <div className="detail-sections">
               <DetailSection title="Datos personales">
                 <div className="detail-grid">
-                  <DetailRow label="Fecha de nacimiento" value={formatDate(patient.date_of_birth)} />
-                  <DetailRow label="CURP" value={patient.curp} mono />
+                  <DetailRow label="Nombre(s)" value={patient.first_name} />
+                  <DetailRow label="Apellido paterno" value={patient.last_name} />
+                  <DetailRow label="Apellido materno" value={patient.last_name_maternal} />
+                  <DetailRow label="Fecha de nacimiento" value={formatDate(patient.birth_date || patient.date_of_birth)} />
+                  <DetailRow label="Edad" value={age !== null ? `${age} años` : null} />
+                  <DetailRow label="Sexo" value={<GenderBadge gender={patient.gender} />} />
                   <DetailRow label="Tipo de sangre" value={patient.blood_type} />
-                  <DetailRow label="Género" value={<GenderBadge gender={patient.gender} />} />
+                  <DetailRow label="CURP" value={patient.curp} mono />
+                  <DetailRow label="Estado civil" value={patient.estado_civil} />
+                  <DetailRow label="Ocupación" value={patient.ocupacion} />
                 </div>
               </DetailSection>
 
-              <DetailSection title="Contacto">
-                <div className="detail-grid">
-                  <DetailRow label="Teléfono" value={patient.phone} />
-                  <DetailRow label="Email" value={patient.email} />
-                  <DetailRow label="Dirección" value={patient.address} full />
-                  <DetailRow label="Contacto de emergencia" value={patient.emergency_contact_name} />
-                  <DetailRow label="Tel. emergencia" value={patient.emergency_contact_phone} />
-                </div>
-              </DetailSection>
+              {!patient.is_minor ? (
+                <DetailSection title="Contacto">
+                  <div className="detail-grid">
+                    <DetailRow label="Teléfono" value={patient.phone} />
+                    <DetailRow label="Email" value={patient.email} />
+                    <DetailRow label="Calle y número" value={patient.address} full />
+                    <DetailRow label="Colonia" value={patient.colonia} />
+                    <DetailRow label="Ciudad" value={patient.ciudad} />
+                    <DetailRow label="Estado" value={patient.estado} />
+                    <DetailRow label="C.P." value={patient.codigo_postal} />
+                  </div>
+                </DetailSection>
+              ) : (
+                <DetailSection title="Acompañante (tutor legal)">
+                  <div className="detail-grid">
+                    <DetailRow label="Nombre" value={[patient.companion_first_name, patient.companion_last_name, patient.companion_last_name_maternal].filter(Boolean).join(' ')} full />
+                    <DetailRow label="Relación" value={patient.companion_relationship} />
+                    <DetailRow label="Teléfono" value={patient.companion_phone} />
+                    <DetailRow label="Email" value={patient.companion_email} />
+                  </div>
+                </DetailSection>
+              )}
 
               {(patient.allergies || patient.notes) && (
                 <DetailSection title="Datos médicos">
                   <div className="detail-grid">
-                    {patient.allergies && (
-                      <DetailRow label="Alergias" value={patient.allergies} full highlight="warning" />
-                    )}
-                    {patient.notes && (
-                      <DetailRow label="Notas clínicas" value={patient.notes} full />
-                    )}
+                    {patient.allergies && <DetailRow label="Alergias" value={patient.allergies} full highlight="warning" />}
+                    {patient.notes && <DetailRow label="Antecedentes / Notas" value={patient.notes} full />}
                   </div>
                 </DetailSection>
+              )}
+
+              {patient.privacy_accepted && (
+                <div style={{ marginTop: '0.75rem', fontSize: '0.72rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <span style={{ color: 'var(--success)' }}>✓</span>
+                  Aviso de privacidad aceptado{patient.privacy_accepted_at ? ` el ${formatDate(patient.privacy_accepted_at?.split('T')[0])}` : ''}
+                </div>
               )}
             </div>
           )}
