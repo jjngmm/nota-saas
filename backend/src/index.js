@@ -13,6 +13,7 @@ const doctorRegisterRoutes = require('./routes/doctor_register');
 const doctorConfigRoutes = require('./routes/doctor_config');
 const ayudaRoutes = require('./routes/ayuda');
 const planesRoutes = require('./routes/planes');
+const estadisticasRoutes = require('./routes/estadisticas');
 const scribeRoutes = require('./routes/scribe');
 
 const app = express();
@@ -94,6 +95,7 @@ app.use('/api/scribe', scribeRoutes);
 app.use('/api/config', doctorConfigRoutes);
 app.use('/api/ayuda', ayudaRoutes);
 app.use('/api/planes', planesRoutes);
+app.use('/api/estadisticas', estadisticasRoutes);
 
 
 app.use((err, req, res, next) => {
