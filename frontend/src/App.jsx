@@ -12,6 +12,7 @@ import ClinicalNotePage from "./pages/ClinicalNotePage";
 import DoctorRegisterPage from "./pages/DoctorRegisterPage";
 import ConfiguracionPage from "./pages/ConfiguracionPage";
 import AyudaPage from "./pages/AyudaPage";
+import PlanesPage from "./pages/PlanesPage";
 import "./styles/nota.css";
 import "./styles/appointments.css";
 import "./styles/patients.css";
@@ -20,6 +21,7 @@ import "./styles/clinical_notes.css";
 import "./styles/register.css";
 import "./styles/configuracion.css";
 import "./styles/ayuda.css";
+import "./styles/planes.css";
 
 function ProtectedRoute({ children, roles }) {
   const { user, token } = useAuth();
@@ -84,6 +86,10 @@ export default function App() {
           <Route
             path="/ayuda"
             element={<ProtectedRoute><AyudaPage /></ProtectedRoute>}
+          />
+          <Route
+            path="/planes"
+            element={<ProtectedRoute><PlanesPage /></ProtectedRoute>}
           />
           <Route
             path="/clinical-notes/:appointment_id"
