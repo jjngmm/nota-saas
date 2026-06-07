@@ -14,6 +14,7 @@ const doctorConfigRoutes = require('./routes/doctor_config');
 const ayudaRoutes = require('./routes/ayuda');
 const planesRoutes = require('./routes/planes');
 const estadisticasRoutes = require('./routes/estadisticas');
+const formsRoutes = require('./routes/forms');
 const scribeRoutes = require('./routes/scribe');
 
 const app = express();
@@ -96,6 +97,7 @@ app.use('/api/config', doctorConfigRoutes);
 app.use('/api/ayuda', ayudaRoutes);
 app.use('/api/planes', planesRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
+app.use('/api/forms', formsRoutes);
 
 
 app.use((err, req, res, next) => {

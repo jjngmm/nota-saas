@@ -14,6 +14,8 @@ import ConfiguracionPage from "./pages/ConfiguracionPage";
 import AyudaPage from "./pages/AyudaPage";
 import PlanesPage from "./pages/PlanesPage";
 import EstadisticasPage from "./pages/EstadisticasPage";
+import FormulariosPage from "./pages/FormulariosPage";
+import FormularioPublico from "./pages/FormularioPublico";
 import "./styles/nota.css";
 import "./styles/appointments.css";
 import "./styles/patients.css";
@@ -24,6 +26,7 @@ import "./styles/configuracion.css";
 import "./styles/ayuda.css";
 import "./styles/planes.css";
 import "./styles/estadisticas.css";
+import "./styles/forms.css";
 
 function ProtectedRoute({ children, roles }) {
   const { user, token } = useAuth();
@@ -97,6 +100,12 @@ export default function App() {
             path="/estadisticas"
             element={<ProtectedRoute><EstadisticasPage /></ProtectedRoute>}
           />
+          <Route
+            path="/formularios"
+            element={<ProtectedRoute><FormulariosPage /></ProtectedRoute>}
+          />
+          {/* Ruta pública — no requiere autenticación */}
+          <Route path="/f/:token" element={<FormularioPublico />} />
           <Route
             path="/clinical-notes/:appointment_id"
             element={

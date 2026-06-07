@@ -1,0 +1,432 @@
+/* ============================================================
+   Nōta — Formularios para pacientes
+   ============================================================ */
+
+/* ── Lista de formularios ── */
+.forms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.form-card {
+  background: var(--surface);
+  border: 0.5px solid var(--cream-mid);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.form-card:hover { box-shadow: var(--shadow); border-color: var(--ink-15); }
+.form-card--inactive { opacity: 0.6; }
+
+.form-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+.form-card__title { font-size: 0.95rem; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.form-card__desc { font-size: 0.82rem; color: var(--ink-40); line-height: 1.5; }
+
+.form-status-badge {
+  font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 0.2rem 0.6rem; border-radius: 20px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.form-status-badge--active   { background: var(--forest-soft); color: var(--forest-mid); border: 0.5px solid var(--forest-lite); }
+.form-status-badge--inactive { background: var(--ink-06); color: var(--ink-40); border: 0.5px solid var(--ink-15); }
+
+.form-card__meta {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+  font-size: 0.78rem; color: var(--ink-40);
+}
+.form-card__meta span { display: flex; align-items: center; gap: 0.25rem; }
+
+.form-card__link-row {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--cream); border: 0.5px solid var(--cream-mid);
+  border-radius: 7px; padding: 0.45rem 0.75rem;
+}
+.form-card__link {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-40);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+}
+.form-card__copy-btn {
+  background: none; border: none; cursor: pointer; color: var(--forest-mid);
+  font-size: 0.75rem; font-weight: 600; white-space: nowrap; font-family: var(--font);
+  flex-shrink: 0; padding: 0;
+}
+.form-card__copy-btn:hover { text-decoration: underline; }
+
+.form-card__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ── Constructor de formulario ── */
+.form-builder {
+  max-width: 760px;
+}
+
+.form-builder__header {
+  background: var(--surface);
+  border: 0.5px solid var(--cream-mid);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.form-builder__title-input {
+  width: 100%;
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: 1.6rem;
+  color: var(--ink);
+  border: none;
+  border-bottom: 1.5px solid var(--cream-mid);
+  padding: 0 0 0.5rem;
+  background: transparent;
+  outline: none;
+  letter-spacing: -0.3px;
+  transition: border-color 0.15s;
+}
+.form-builder__title-input:focus { border-bottom-color: var(--forest-mid); }
+.form-builder__title-input::placeholder { color: var(--ink-15); }
+
+.form-builder__desc-input {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 0.9rem;
+  color: var(--ink-40);
+  border: none;
+  background: transparent;
+  outline: none;
+  resize: none;
+  min-height: 40px;
+  line-height: 1.5;
+}
+.form-builder__desc-input::placeholder { color: var(--ink-15); }
+
+/* Preguntas */
+.form-questions { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; }
+
+.form-question {
+  background: var(--surface);
+  border: 0.5px solid var(--cream-mid);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-question:hover { border-color: var(--ink-15); }
+.form-question--focused { border-color: var(--forest-mid); box-shadow: 0 0 0 3px rgba(45,90,61,.08); }
+
+.form-question__bar {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.75rem 1.1rem;
+  background: var(--cream);
+  border-bottom: 0.5px solid var(--cream-mid);
+}
+
+.form-question__num {
+  font-family: var(--font-serif); font-style: italic; font-size: 1rem;
+  color: var(--ink-40); font-weight: 300; min-width: 20px; flex-shrink: 0;
+}
+
+.form-question__type-select {
+  font-size: 0.78rem; font-weight: 600; color: var(--forest-mid);
+  background: var(--forest-soft); border: 0.5px solid var(--forest-lite);
+  border-radius: 6px; padding: 0.25rem 0.6rem;
+  font-family: var(--font); cursor: pointer; appearance: none; outline: none;
+}
+
+.form-question__required-toggle {
+  margin-left: auto; display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.72rem; color: var(--ink-40); font-weight: 500; cursor: pointer;
+  user-select: none;
+}
+.form-question__required-toggle input { accent-color: var(--forest-mid); }
+
+.form-question__drag { cursor: grab; color: var(--ink-40); font-size: 1rem; }
+.form-question__del {
+  background: none; border: none; cursor: pointer; color: var(--ink-40);
+  font-size: 0.85rem; padding: 0.2rem; transition: color 0.12s;
+}
+.form-question__del:hover { color: var(--error); }
+
+.form-question__body { padding: 0.9rem 1.1rem; display: flex; flex-direction: column; gap: 0.65rem; }
+
+.form-q-input {
+  width: 100%; border: none; border-bottom: 1px solid var(--cream-mid);
+  padding: 0.3rem 0; font-size: 0.9rem; color: var(--ink); background: transparent;
+  font-family: var(--font); outline: none; transition: border-color 0.15s;
+}
+.form-q-input:focus { border-bottom-color: var(--forest-mid); }
+.form-q-input::placeholder { color: var(--ink-15); }
+
+.form-q-preview {
+  font-size: 0.82rem; color: var(--ink-40); display: flex; align-items: center;
+  gap: 0.4rem; padding-top: 0.25rem;
+}
+
+/* Opciones de opción múltiple / casillas */
+.form-opciones { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.form-opcion {
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.form-opcion__marker {
+  width: 16px; height: 16px; border: 1.5px solid var(--cream-mid); border-radius: 50%;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.form-opcion__marker--check { border-radius: 4px; }
+
+.form-opcion__input {
+  flex: 1; border: none; border-bottom: 1px dashed var(--cream-mid);
+  padding: 0.2rem 0; font-size: 0.85rem; color: var(--ink); background: transparent;
+  font-family: var(--font); outline: none; transition: border-color 0.15s;
+}
+.form-opcion__input:focus { border-bottom-color: var(--forest-mid); border-bottom-style: solid; }
+
+.form-opcion__del {
+  background: none; border: none; cursor: pointer; color: var(--ink-40);
+  font-size: 0.8rem; padding: 0.15rem; flex-shrink: 0;
+}
+.form-opcion__del:hover { color: var(--error); }
+
+.form-add-opcion {
+  background: none; border: none; cursor: pointer; font-size: 0.78rem;
+  color: var(--forest-mid); font-weight: 500; font-family: var(--font);
+  padding: 0.25rem 0; text-align: left; margin-top: 0.25rem;
+}
+.form-add-opcion:hover { text-decoration: underline; }
+
+/* Add question button */
+.form-add-question {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  width: 100%; padding: 0.75rem; border: 1.5px dashed var(--cream-mid);
+  border-radius: 10px; background: none; cursor: pointer; font-size: 0.875rem;
+  color: var(--ink-40); font-family: var(--font); transition: all 0.15s;
+}
+.form-add-question:hover { border-color: var(--forest-mid); color: var(--forest-mid); background: var(--forest-soft); }
+
+/* File upload zona */
+.form-upload-zone {
+  border: 1.5px dashed var(--cream-mid); border-radius: 12px;
+  padding: 2rem; text-align: center; background: var(--cream);
+  cursor: pointer; transition: all 0.15s; position: relative;
+}
+.form-upload-zone:hover, .form-upload-zone--drag { border-color: var(--forest-mid); background: var(--forest-soft); }
+.form-upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.form-upload-zone__icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.form-upload-zone__title { font-size: 0.9rem; font-weight: 500; color: var(--ink); margin-bottom: 0.25rem; }
+.form-upload-zone__sub { font-size: 0.78rem; color: var(--ink-40); }
+
+.form-parse-status {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+  background: var(--forest-soft); border: 0.5px solid var(--forest-lite);
+  border-radius: 8px; font-size: 0.85rem; color: var(--forest-mid);
+}
+
+/* ── Vista de respuestas ── */
+.resp-card {
+  background: var(--surface);
+  border: 0.5px solid var(--cream-mid);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.resp-card__header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.75rem; padding-bottom: 0.6rem;
+  border-bottom: 0.5px solid var(--cream-mid);
+}
+.resp-card__name { font-size: 0.9rem; font-weight: 600; color: var(--ink); }
+.resp-card__date { font-size: 0.75rem; color: var(--ink-40); font-family: var(--font-mono); }
+.resp-card__answers { display: flex; flex-direction: column; gap: 0.6rem; }
+.resp-answer { }
+.resp-answer__q { font-size: 0.75rem; font-weight: 600; color: var(--ink-40); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.15rem; }
+.resp-answer__a { font-size: 0.875rem; color: var(--ink); line-height: 1.5; }
+
+/* ══════════════════════════════════════════════════════
+   PÁGINA PÚBLICA DEL PACIENTE
+   ══════════════════════════════════════════════════════ */
+.public-form-page {
+  min-height: 100vh;
+  background: var(--cream, #F7F5F0);
+  display: flex;
+  flex-direction: column;
+}
+
+.public-form-header {
+  padding: 1.1rem 2rem;
+  background: var(--ink, #0D1117);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.public-form-header__mark {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--ink-90, #1A2128);
+  border: 0.5px solid rgba(255,255,255,.1);
+  display: flex; align-items: center; justify-content: center;
+}
+.public-form-header__mark span {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic; font-weight: 300; font-size: 18px; color: #F7F5F0; line-height: 1;
+}
+.public-form-header__name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 300; font-size: 1.2rem; color: #F7F5F0; letter-spacing: -0.3px;
+}
+.public-form-header__name em { font-style: italic; }
+
+.public-form-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.public-form-card {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 640px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.07);
+  overflow: hidden;
+}
+
+.public-form-card__accent {
+  height: 5px;
+  background: var(--forest-mid, #2D5A3D);
+}
+
+.public-form-card__body { padding: 2rem 2rem 1.5rem; }
+
+.public-form-card__doctor {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-size: 0.78rem; color: var(--ink-40, #6B7C80);
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 0.5px solid var(--cream-mid, #E8E3D8);
+}
+.public-form-card__doctor-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--forest-soft, #EAF0EB);
+  border: 0.5px solid var(--forest-lite, #C8DCCB);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic; font-size: 0.9rem; color: var(--forest-mid, #2D5A3D);
+}
+
+.public-form-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 300; font-size: 1.7rem; color: var(--ink, #0D1117);
+  letter-spacing: -0.4px; margin-bottom: 0.4rem; line-height: 1.15;
+}
+.public-form-desc { font-size: 0.875rem; color: var(--ink-40, #6B7C80); line-height: 1.6; margin-bottom: 1.75rem; }
+
+/* Datos del paciente */
+.public-patient-fields {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 0.5px solid var(--cream-mid, #E8E3D8);
+}
+.public-patient-field { display: flex; flex-direction: column; gap: 0.3rem; }
+.public-patient-field--full { grid-column: 1 / -1; }
+.public-patient-label {
+  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--ink-40, #6B7C80);
+}
+.public-patient-input {
+  padding: 0.55rem 0.8rem; border: 1px solid var(--cream-mid, #E8E3D8);
+  border-radius: 8px; font-size: 0.875rem; color: var(--ink, #0D1117);
+  background: #fff; font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.15s; box-sizing: border-box; width: 100%;
+}
+.public-patient-input:focus { outline: none; border-color: var(--forest-mid, #2D5A3D); box-shadow: 0 0 0 3px rgba(45,90,61,.1); }
+
+/* Preguntas del formulario público */
+.public-questions { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
+
+.public-question { display: flex; flex-direction: column; gap: 0.5rem; }
+.public-question__num {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.75rem; font-weight: 300; font-style: italic;
+  color: var(--forest-mid, #2D5A3D); letter-spacing: 0.02em;
+}
+.public-question__text {
+  font-size: 0.95rem; font-weight: 500; color: var(--ink, #0D1117);
+  line-height: 1.4;
+}
+.public-question__required { color: var(--error, #dc2626); margin-left: 2px; }
+
+.public-answer-input {
+  width: 100%; padding: 0.6rem 0.85rem; border: 1px solid var(--cream-mid, #E8E3D8);
+  border-radius: 8px; font-size: 0.875rem; color: var(--ink, #0D1117);
+  background: #fff; font-family: 'DM Sans', sans-serif; box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.public-answer-input:focus { outline: none; border-color: var(--forest-mid, #2D5A3D); box-shadow: 0 0 0 3px rgba(45,90,61,.1); }
+.public-answer-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+.public-option {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0.75rem; border: 1px solid var(--cream-mid, #E8E3D8);
+  border-radius: 8px; cursor: pointer; transition: all 0.12s;
+}
+.public-option:hover { border-color: var(--forest-mid, #2D5A3D); background: var(--forest-soft, #EAF0EB); }
+.public-option--selected { border-color: var(--forest-mid, #2D5A3D); background: var(--forest-soft, #EAF0EB); }
+.public-option input { accent-color: var(--forest-mid, #2D5A3D); }
+.public-option__label { font-size: 0.875rem; color: var(--ink, #0D1117); }
+
+.public-scale {
+  display: flex; gap: 0.4rem; flex-wrap: wrap;
+}
+.public-scale-btn {
+  width: 38px; height: 38px; border: 1px solid var(--cream-mid, #E8E3D8);
+  border-radius: 8px; background: #fff; cursor: pointer;
+  font-size: 0.85rem; font-weight: 500; color: var(--ink-40, #6B7C80);
+  font-family: 'DM Sans', sans-serif; transition: all 0.12s;
+  display: flex; align-items: center; justify-content: center;
+}
+.public-scale-btn:hover { border-color: var(--forest-mid, #2D5A3D); }
+.public-scale-btn--selected { background: var(--forest-mid, #2D5A3D); color: #fff; border-color: var(--forest-mid, #2D5A3D); }
+
+.public-submit-btn {
+  width: 100%; padding: 0.85rem; background: var(--forest-mid, #2D5A3D);
+  color: #fff; border: none; border-radius: 10px; font-size: 0.95rem;
+  font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s;
+}
+.public-submit-btn:hover:not(:disabled) { background: var(--forest, #1B3A2A); }
+.public-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.public-form-success {
+  text-align: center; padding: 3rem 1.5rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+}
+.public-form-success__icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--forest-soft, #EAF0EB); border: 0.5px solid var(--forest-lite, #C8DCCB);
+  color: var(--forest-mid, #2D5A3D); font-size: 2rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.public-form-success__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 300; font-size: 1.75rem; color: var(--ink, #0D1117);
+}
+.public-form-success__desc { font-size: 0.9rem; color: var(--ink-40, #6B7C80); line-height: 1.6; max-width: 360px; }
+
+.public-form-footer {
+  padding: 1rem 2rem;
+  border-top: 0.5px solid var(--cream-mid, #E8E3D8);
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--ink-40, #6B7C80);
+}
+
+@media (max-width: 600px) {
+  .forms-grid { grid-template-columns: 1fr; }
+  .public-patient-fields { grid-template-columns: 1fr; }
+  .public-form-card__body { padding: 1.5rem 1.25rem 1.25rem; }
+}
