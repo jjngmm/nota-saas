@@ -27,9 +27,7 @@ router.post('/doctor-register', async (req, res) => {
     if (!accepted_terms) {
       return res.status(400).json({ error: 'Debes aceptar los términos y condiciones' });
     }
-    if (!accepted_data_transfer) {
-      return res.status(400).json({ error: 'Debes aceptar la transferencia de datos personales' });
-    }
+    // accepted_data_transfer es opcional
     if (password.length < 8) {
       return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
     }

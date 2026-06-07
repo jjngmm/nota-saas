@@ -74,10 +74,7 @@ export default function DoctorRegisterPage() {
       setError('Debes aceptar los términos y condiciones para continuar.');
       return;
     }
-    if (!form.accepted_data_transfer) {
-      setError('Debes aceptar la transferencia de datos personales para continuar.');
-      return;
-    }
+    // accepted_data_transfer es opcional
 
     setLoading(true);
     try {
