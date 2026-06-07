@@ -83,4 +83,40 @@ router.get('/doctors', async (req, res) => {
   }
 });
 
+// GET /api/doctors/me/availability
+router.get('/doctors/me/availability', authMiddleware, async (req, res) => {
+  try {
+    const { data: doctor } = await req.supabase
+      .from('doctors').select('id').eq('user_id', req.user.userId).single();
+    if (!doctor) return res.status(404).json({ error: 'Médico no encontrado' });
+
+    const { data, error } = await req.supabase
+      .from('doctor_availability').select('*').eq('doctor_id', doctor.id).order('day_of_week');
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data || []);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/doctors/me/availability — reemplaza toda la disponibilidad
+router.post('/doctors/me/availability', authMiddleware, async (req, res) => {
+  try {
+    const { data: doctor } = await req.supabase
+      .from('doctors').select('id').eq('user_id', req.user.userId).single();
+    if (!doctor) return res.status(404).json({ error: 'Médico no encontrado' });
+
+    const { availability } = req.body;
+    await req.supabase.from('doctor_availability').delete().eq('doctor_id', doctor.id);
+
+    if (availability && availability.length > 0) {
+      const rows = availability.map(a => ({
+        doctor_id: doctor.id, org_id: req.user.orgId,
+        day_of_week: a.day_of_week, start_time: a.start_time, end_time: a.end_time, is_available: true,
+      }));
+      await req.supabase.from('doctor_availability').insert(rows);
+    }
+    res.json({ message: 'Disponibilidad actualizada' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 module.exports = router;

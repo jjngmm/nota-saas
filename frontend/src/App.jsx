@@ -10,12 +10,14 @@ import PatientPortal from './pages/PatientPortal';
 import AdminPanel from "./pages/AdminPanel";
 import ClinicalNotePage from "./pages/ClinicalNotePage";
 import DoctorRegisterPage from "./pages/DoctorRegisterPage";
+import ConfiguracionPage from "./pages/ConfiguracionPage";
 import "./styles/nota.css";
 import "./styles/appointments.css";
 import "./styles/patients.css";
 import "./styles/dashboard.css";
 import "./styles/clinical_notes.css";
 import "./styles/register.css";
+import "./styles/configuracion.css";
 
 function ProtectedRoute({ children, roles }) {
   const { user, token } = useAuth();
@@ -72,6 +74,10 @@ export default function App() {
                 <AdminPanel />
               </ProtectedRoute>
             }
+          />
+          <Route
+            path="/configuracion"
+            element={<ProtectedRoute><ConfiguracionPage /></ProtectedRoute>}
           />
           <Route
             path="/clinical-notes/:appointment_id"

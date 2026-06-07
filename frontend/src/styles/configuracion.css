@@ -1,0 +1,476 @@
+/* ============================================================
+   Nōta — Configuración del médico
+   ============================================================ */
+
+.config-layout {
+  display: flex;
+  min-height: calc(100vh - var(--navbar-h, 60px));
+}
+
+/* Sidebar de secciones */
+.config-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  border-right: 0.5px solid var(--cream-mid);
+  padding: 1.5rem 0;
+  background: var(--surface);
+  position: sticky;
+  top: var(--navbar-h, 60px);
+  height: calc(100vh - var(--navbar-h, 60px));
+  overflow-y: auto;
+}
+
+.config-sidebar__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-40);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.25rem 1.25rem 0.5rem;
+  margin-top: 1rem;
+}
+
+.config-sidebar__label:first-child { margin-top: 0; }
+
+.config-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  color: var(--ink-40);
+  font-weight: 450;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+  border-left: 2px solid transparent;
+  font-family: var(--font);
+}
+
+.config-nav-item:hover {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.config-nav-item--active {
+  background: var(--forest-soft);
+  color: var(--forest-mid);
+  border-left-color: var(--forest-mid);
+  font-weight: 500;
+}
+
+.config-nav-item__icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+}
+
+/* Contenido principal */
+.config-main {
+  flex: 1;
+  padding: 2rem 2.5rem;
+  max-width: 800px;
+}
+
+.config-section__title {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: 1.7rem;
+  color: var(--ink);
+  letter-spacing: -0.4px;
+  margin-bottom: 0.3rem;
+}
+
+.config-section__sub {
+  font-size: 0.85rem;
+  color: var(--ink-40);
+  margin-bottom: 2rem;
+}
+
+/* Cards de config */
+.config-card {
+  background: var(--surface);
+  border: 0.5px solid var(--cream-mid);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.config-card__title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-40);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 1.1rem;
+}
+
+/* Form fields */
+.config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.config-grid--3 { grid-template-columns: 1fr 1fr 1fr; }
+.config-grid--full { grid-column: 1 / -1; }
+
+.config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.config-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-40);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.config-input,
+.config-select,
+.config-textarea {
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--cream-mid);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--ink);
+  background: var(--surface);
+  font-family: var(--font);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.config-input:focus,
+.config-select:focus,
+.config-textarea:focus {
+  outline: none;
+  border-color: var(--forest-mid);
+  box-shadow: 0 0 0 3px rgba(45,90,61,.1);
+}
+
+.config-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.config-select-wrap { position: relative; }
+.config-select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-40);
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+.config-select { appearance: none; -webkit-appearance: none; }
+
+/* Avatar / foto */
+.config-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.config-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--forest-soft);
+  border: 0.5px solid var(--forest-lite);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.75rem;
+  color: var(--forest-mid);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.config-avatar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.config-avatar-hint {
+  font-size: 0.78rem;
+  color: var(--ink-40);
+}
+
+/* Toggle switch */
+.config-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.config-toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 0.5px solid var(--cream-mid);
+  gap: 1rem;
+}
+
+.config-toggle-item:last-child { border-bottom: none; }
+
+.config-toggle-item__info { flex: 1; }
+
+.config-toggle-item__label {
+  font-size: 0.875rem;
+  color: var(--ink);
+  font-weight: 450;
+  line-height: 1.3;
+}
+
+.config-toggle-item__desc {
+  font-size: 0.78rem;
+  color: var(--ink-40);
+  margin-top: 2px;
+}
+
+/* Toggle switch UI */
+.config-toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.config-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.config-toggle__track {
+  position: absolute;
+  inset: 0;
+  background: var(--ink-15);
+  border-radius: 22px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.config-toggle input:checked + .config-toggle__track {
+  background: var(--forest-mid);
+}
+
+.config-toggle__track::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+
+.config-toggle input:checked + .config-toggle__track::after {
+  transform: translateX(18px);
+}
+
+/* Templates list */
+.config-template-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.config-template-card {
+  border: 0.5px solid var(--cream-mid);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--surface);
+}
+
+.config-template-card__info { flex: 1; }
+.config-template-card__title { font-size: 0.875rem; font-weight: 500; color: var(--ink); }
+.config-template-card__type {
+  font-size: 0.75rem;
+  color: var(--ink-40);
+  margin-top: 2px;
+  text-transform: capitalize;
+}
+
+.config-template-card__actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* Papelería preview */
+.papeleria-preview {
+  background: white;
+  border: 0.5px solid var(--cream-mid);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: var(--ink-40);
+  min-height: 120px;
+  font-family: var(--font);
+}
+
+.papeleria-preview__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--cream-mid);
+  margin-bottom: 0.75rem;
+}
+
+.papeleria-preview__logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  background: var(--cream);
+  border: 0.5px dashed var(--cream-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--ink-40);
+}
+
+.papeleria-preview__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.papeleria-preview__doctor-info { text-align: right; }
+.papeleria-preview__name { font-size: 0.95rem; font-weight: 600; color: var(--ink); }
+.papeleria-preview__specialty { font-size: 0.78rem; color: var(--ink-40); }
+
+/* Actions bar */
+.config-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 0.5px solid var(--cream-mid);
+  margin-top: 1.25rem;
+}
+
+/* Google sync badges */
+.config-sync-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 0.5px solid var(--cream-mid);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.config-sync-item__left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.config-sync-item__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.config-sync-item__title { font-size: 0.875rem; font-weight: 500; color: var(--ink); }
+.config-sync-item__desc { font-size: 0.78rem; color: var(--ink-40); margin-top: 1px; }
+
+/* Cobros */
+.config-cobro-section {
+  border: 0.5px solid var(--cream-mid);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.config-cobro-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  background: var(--cream);
+  border-bottom: 0.5px solid var(--cream-mid);
+}
+
+.config-cobro-header__left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.config-cobro-body {
+  padding: 1rem 1.1rem;
+}
+
+/* Password section */
+.config-password-hint {
+  font-size: 0.78rem;
+  color: var(--ink-40);
+  margin-top: 0.25rem;
+}
+
+.config-save-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--forest-mid);
+  color: #fff;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  z-index: 200;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .config-layout { flex-direction: column; }
+  .config-sidebar { width: 100%; height: auto; position: static; display: flex; flex-wrap: wrap; padding: 0.5rem; border-right: none; border-bottom: 0.5px solid var(--cream-mid); }
+  .config-nav-item { padding: 0.5rem 0.75rem; font-size: 0.8rem; border-left: none; border-bottom: 2px solid transparent; }
+  .config-nav-item--active { border-bottom-color: var(--forest-mid); border-left-color: transparent; }
+  .config-main { padding: 1.25rem; }
+  .config-grid, .config-grid--3 { grid-template-columns: 1fr; }
+}
