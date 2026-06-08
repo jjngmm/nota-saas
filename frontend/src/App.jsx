@@ -35,8 +35,17 @@ import "./styles/forms.css";
 function ProtectedRoute({ children, roles }) {
   const { user, token } = useAuth();
   if (!token) return <Navigate to="/login" replace />;
-  if (roles && !roles.includes(user?.role)) return <Navigate to="/dashboard" replace />;
+  if (roles && !roles.includes(user?.role)) {
+    // Secretary va a /agenda si se bloquea; otros al dashboard
+    return <Navigate to={user?.role === 'secretary' ? '/agenda' : '/dashboard'} replace />;
+  }
   return children;
+}
+
+// Redirect por defecto según rol
+function DefaultRedirect() {
+  const { user } = useAuth();
+  return <Navigate to={user?.role === 'secretary' ? '/agenda' : '/dashboard'} replace />;
 }
 
 export default function App() {
@@ -66,7 +75,7 @@ export default function App() {
             element={<ProtectedRoute><PatientsPage /></ProtectedRoute>}
           />
           <Route path="/patients/:id"
-            element={<ProtectedRoute><PatientPage /></ProtectedRoute>}
+            element={<ProtectedRoute roles={["admin","doctor"]}><PatientPage /></ProtectedRoute>}
           />
           <Route path="/admin"
             element={<ProtectedRoute roles={["admin"]}><AdminPanel /></ProtectedRoute>}
@@ -84,7 +93,7 @@ export default function App() {
             element={<ProtectedRoute><EstadisticasPage /></ProtectedRoute>}
           />
           <Route path="/formularios"
-            element={<ProtectedRoute roles={["admin","doctor"]}><FormulariosPage /></ProtectedRoute>}
+            element={<ProtectedRoute roles={["admin","doctor","secretary"]}><FormulariosPage /></ProtectedRoute>}
           />
           {/* Ruta pública — no requiere autenticación */}
           <Route path="/f/:token" element={<FormularioPublico />} />
@@ -95,12 +104,12 @@ export default function App() {
           <Route
             path="/clinical-notes/:appointment_id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["admin","doctor"]}>
                 <ClinicalNotePage />
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<DefaultRedirect />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

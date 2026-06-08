@@ -107,7 +107,8 @@ export default function PatientDetailModal({ patient: rawPatient, isSecretary, o
   const TABS = [
     { id: "info",         label: "Información" },
     { id: "documentos",   label: docsPending ? "Documentos ⚠" : "Documentos" },
-    { id: "expediente",   label: `Expediente (${clinicalNotes.length})` },
+    // Expediente y notas clínicas: solo admin y doctor
+    ...(!isSecretary ? [{ id: "expediente", label: `Expediente (${clinicalNotes.length})` }] : []),
     { id: "appointments", label: `Citas (${appointments.length})` },
   ];
 
@@ -129,13 +130,16 @@ export default function PatientDetailModal({ patient: rawPatient, isSecretary, o
               </div>
             </div>
           </div>
-          <button
-            className="pp-edit-btn"
-            style={{marginRight:'0.5rem'}}
-            onClick={() => { onClose(); navigate(`/patients/${pat.id}`); }}
-          >
-            📋 Ver expediente completo →
-          </button>
+          {/* Solo admin y doctor pueden abrir el expediente completo */}
+          {!isSecretary && (
+            <button
+              className="pp-edit-btn"
+              style={{marginRight:'0.5rem'}}
+              onClick={() => { onClose(); navigate(`/patients/${pat.id}`); }}
+            >
+              📋 Ver expediente completo →
+            </button>
+          )}
           <button className="modal-close" onClick={onClose}>
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

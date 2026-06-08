@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   {
     to: "/dashboard",
     label: "Dashboard",
+    roles: ["admin", "doctor"],
     icon: (
       <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
@@ -61,7 +62,7 @@ const NAV_ITEMS = [
   {
     to: "/formularios",
     label: "Formularios",
-    roles: ["admin", "doctor"],
+    roles: ["admin", "doctor", "secretary"],
     icon: (
       <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}

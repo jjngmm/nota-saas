@@ -89,8 +89,8 @@ export default function PatientsPage() {
   }
 
   const hasFilters = search || filterGender || filterAgeMin || filterAgeMax || filterDx;
-  const isSecretary = user?.role === 'secretary' || user?.role === 'admin';
-  const canCreate   = isSecretary || user?.role === 'doctor';
+  const isSecretary = user?.role === 'secretary';
+  const canCreate   = ['admin', 'doctor', 'secretary'].includes(user?.role);
 
   const stats = {
     total:    patients.length,
