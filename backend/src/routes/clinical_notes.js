@@ -84,17 +84,18 @@ router.post('/clinical-notes', authMiddleware, async (req, res) => {
 router.put('/clinical-notes/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const { subjective, objective, assessment, plan, raw_transcript, ai_summary } = req.body;
+    const {
+      subjective, objective, assessment, plan,
+      raw_transcript, ai_summary,
+      vital_signs, diagnosis, diagnosis_cie10, prescriptions,
+    } = req.body;
 
     const { data, error } = await req.supabase
       .from('clinical_notes')
       .update({
-        subjective,
-        objective,
-        assessment,
-        plan,
-        raw_transcript,
-        ai_summary,
+        subjective, objective, assessment, plan,
+        raw_transcript, ai_summary,
+        vital_signs, diagnosis, diagnosis_cie10, prescriptions,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)

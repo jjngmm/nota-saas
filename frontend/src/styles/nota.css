@@ -235,6 +235,71 @@ img { display: block; max-width: 100%; }
 }
 .logout-btn:hover { background: var(--error-soft); color: var(--error); }
 
+/* ── Sidebar toggle button ── */
+.sidebar-toggle {
+  position: absolute;
+  top: 70px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 101;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.sidebar-toggle:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+/* ── Sidebar collapsed state ── */
+.sidebar--collapsed {
+  width: 60px;
+}
+.sidebar--collapsed .logo-text,
+.sidebar--collapsed .nav-label,
+.sidebar--collapsed .user-details,
+.sidebar--collapsed .logout-btn {
+  display: none;
+}
+.sidebar--collapsed .sidebar-logo {
+  justify-content: center;
+  padding: 20px 0 18px;
+}
+.sidebar--collapsed .sidebar-nav {
+  padding: 12px 6px;
+  align-items: center;
+}
+.sidebar--collapsed .nav-item {
+  justify-content: center;
+  padding: 10px;
+  width: 42px;
+  align-self: center;
+}
+.sidebar--collapsed .sidebar-footer {
+  justify-content: center;
+  padding: 12px 0;
+}
+.sidebar--collapsed .user-info {
+  justify-content: center;
+}
+
+/* Adjust main content when sidebar is collapsed */
+.sidebar,
+.nota-main {
+  transition: width 0.22s ease, margin-left 0.22s ease;
+}
+body.sidebar-collapsed .nota-main {
+  margin-left: 60px;
+}
+
 /* ── Navbar ── */
 .navbar {
   height: var(--navbar-h);

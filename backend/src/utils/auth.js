@@ -6,12 +6,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 // ==========================================
 // GENERAR TOKEN JWT
 // ==========================================
-function generateToken(userId, orgId, email) {
+function generateToken(userId, orgId, email, role) {
   return jwt.sign(
-    { 
-      userId, 
-      orgId, 
+    {
+      userId,
+      orgId,
       email,
+      role,
       iat: Math.floor(Date.now() / 1000)
     },
     JWT_SECRET,

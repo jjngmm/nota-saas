@@ -123,6 +123,7 @@ export default function EstadisticasPage() {
     { id: 'consultas', label: '🏥 Consultas' },
     { id: 'cobros',    label: '💰 Ingresos y egresos' },
     { id: 'suive',     label: '🦠 SUIVE' },
+    { id: 'historial', label: '📋 Historial de citas' },
     { id: 'busqueda',  label: '🔍 Búsqueda' },
   ];
 
@@ -184,6 +185,7 @@ export default function EstadisticasPage() {
           {tab === 'consultas' && <ConsultasTab desde={desde} hasta={hasta} />}
           {tab === 'cobros'    && <CobrosTab desde={desde} hasta={hasta} />}
           {tab === 'suive'     && <SuiveTab desde={desde} hasta={hasta} />}
+          {tab === 'historial' && <HistorialTab desde={desde} hasta={hasta} />}
           {tab === 'busqueda'  && <BusquedaTab desde={desde} hasta={hasta} />}
         </div>
       </div>
@@ -780,6 +782,158 @@ function BusquedaTab({ desde, hasta }) {
         </div>
       )}
     </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// HISTORIAL DE CITAS
+// ══════════════════════════════════════════════════════════════
+const HIST_STATUS_OPTS = [
+  { value: '', label: 'Todos los estados' },
+  { value: 'scheduled',  label: 'Programada' },
+  { value: 'confirmed',  label: 'Confirmada' },
+  { value: 'completed',  label: 'Completada' },
+  { value: 'cancelled',  label: 'Cancelada' },
+  { value: 'no_show',    label: 'No se presentó' },
+];
+
+const STATUS_BADGE = {
+  scheduled:  { label: 'Programada',      cls: 'hist-badge--blue'    },
+  confirmed:  { label: 'Confirmada',      cls: 'hist-badge--teal'    },
+  completed:  { label: 'Completada',      cls: 'hist-badge--green'   },
+  cancelled:  { label: 'Cancelada',       cls: 'hist-badge--red'     },
+  no_show:    { label: 'No se presentó',  cls: 'hist-badge--yellow'  },
+  waiting:    { label: 'En sala',         cls: 'hist-badge--orange'  },
+};
+
+function HistorialTab({ desde, hasta }) {
+  const [appointments, setAppointments] = useState([]);
+  const [doctors, setDoctors]           = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [search, setSearch]             = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterDoctor, setFilterDoctor] = useState('');
+  const [filterDate, setFilterDate]     = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      api.get(`/api/appointments`),
+      api.get(`/api/doctors`),
+    ]).then(([apptRes, docRes]) => {
+      setAppointments(apptRes.data || []);
+      setDoctors((docRes.data?.doctors || docRes.data || []));
+    }).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  const filtered = appointments.filter(a => {
+    const term = search.toLowerCase();
+    const matchSearch = !term ||
+      (a.patient_name || '').toLowerCase().includes(term) ||
+      (a.doctor_name  || '').toLowerCase().includes(term) ||
+      (a.notes        || '').toLowerCase().includes(term) ||
+      (a.reason       || '').toLowerCase().includes(term);
+    const matchStatus = !filterStatus || a.status === filterStatus;
+    const matchDoctor = !filterDoctor || a.doctor_id === filterDoctor;
+    const matchDate   = !filterDate   || (a.appointment_date || '').startsWith(filterDate);
+    const matchPeriod = (!desde || (a.appointment_date || '') >= desde) &&
+                        (!hasta || (a.appointment_date || '') <= hasta);
+    return matchSearch && matchStatus && matchDoctor && matchDate && matchPeriod;
+  });
+
+  function exportCSV() {
+    if (!filtered.length) return;
+    const rows = [['Fecha','Hora','Paciente','Médico','Tipo','Estado','Motivo']];
+    filtered.forEach(a => rows.push([
+      a.appointment_date || '', a.start_time || '',
+      a.patient_name || '', a.doctor_name || '',
+      a.visit_type || '', a.status || '', a.reason || '',
+    ]));
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const el = document.createElement('a');
+    el.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    el.download = `historial_citas.csv`; el.click();
+  }
+
+  const stats = {
+    total:      filtered.length,
+    completadas: filtered.filter(a => a.status === 'completed').length,
+    canceladas:  filtered.filter(a => a.status === 'cancelled').length,
+    programadas: filtered.filter(a => ['scheduled','confirmed'].includes(a.status)).length,
+  };
+
+  if (loading) return <p style={{color:'var(--ink-40)',padding:'2rem 0'}}>Cargando historial...</p>;
+
+  return (
+    <>
+      <div className="est-kpi-grid">
+        <div className="est-kpi"><span className="est-kpi__icon">📋</span><span className="est-kpi__value">{stats.total}</span><span className="est-kpi__label">Total</span></div>
+        <div className="est-kpi"><span className="est-kpi__icon">📅</span><span className="est-kpi__value">{stats.programadas}</span><span className="est-kpi__label">Programadas</span></div>
+        <div className="est-kpi est-kpi--forest"><span className="est-kpi__icon">✅</span><span className="est-kpi__value">{stats.completadas}</span><span className="est-kpi__label">Completadas</span></div>
+        <div className="est-kpi"><span className="est-kpi__icon">❌</span><span className="est-kpi__value">{stats.canceladas}</span><span className="est-kpi__label">Canceladas</span></div>
+      </div>
+
+      {/* Filtros */}
+      <div className="hist-filters">
+        <div className="busqueda-input-wrap" style={{flex:'1 1 200px'}}>
+          <span className="busqueda-input__icon">🔍</span>
+          <input className="busqueda-input" value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar paciente, médico, motivo..." />
+        </div>
+        <div className="config-select-wrap" style={{flex:'0 0 160px'}}>
+          <select className="config-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+            {HIST_STATUS_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+        <div className="config-select-wrap" style={{flex:'0 0 180px'}}>
+          <select className="config-select" value={filterDoctor} onChange={e => setFilterDoctor(e.target.value)}>
+            <option value="">Todos los médicos</option>
+            {doctors.map(d => <option key={d.id} value={d.id}>{d.first_name} {d.last_name}</option>)}
+          </select>
+        </div>
+        <input type="date" className="est-date-input" value={filterDate}
+          onChange={e => setFilterDate(e.target.value)} style={{flex:'0 0 auto'}} />
+        {(search || filterStatus || filterDoctor || filterDate) && (
+          <button className="est-quick-btn" onClick={() => { setSearch(''); setFilterStatus(''); setFilterDoctor(''); setFilterDate(''); }}>
+            Limpiar
+          </button>
+        )}
+      </div>
+
+      <div className="est-table-wrap">
+        <div className="est-table-header">
+          <span className="est-table-header__title">Citas ({filtered.length})</span>
+          <button className="est-quick-btn" onClick={exportCSV}>↓ Exportar CSV</button>
+        </div>
+        {filtered.length === 0
+          ? <div className="est-empty"><div className="est-empty__icon">📋</div><p>Sin citas que coincidan con los filtros.</p></div>
+          : <table className="est-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th><th>Hora</th><th>Paciente</th><th>Médico</th><th>Tipo</th><th>Motivo</th><th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(a => {
+                  const badge = STATUS_BADGE[a.status] || { label: a.status, cls: '' };
+                  return (
+                    <tr key={a.id}>
+                      <td style={{fontFamily:'var(--font-mono)',fontSize:'0.8rem',color:'var(--ink-40)'}}>{a.appointment_date || '—'}</td>
+                      <td style={{fontFamily:'var(--font-mono)',fontSize:'0.8rem'}}>{a.start_time ? a.start_time.slice(0,5) : '—'}</td>
+                      <td style={{fontWeight:500}}>{a.patient_name || '—'}</td>
+                      <td style={{color:'var(--ink-40)',fontSize:'0.83rem'}}>{a.doctor_name || '—'}</td>
+                      <td style={{color:'var(--ink-40)',fontSize:'0.82rem'}}>{a.visit_type === 'primera_vez' ? 'Primera vez' : a.visit_type === 'subsecuente' ? 'Subsecuente' : a.visit_type || '—'}</td>
+                      <td style={{fontSize:'0.82rem',maxWidth:180,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={a.reason}>{a.reason || '—'}</td>
+                      <td><span className={`hist-badge ${badge.cls}`}>{badge.label}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+        }
+      </div>
+    </>
   );
 }
 

@@ -10,11 +10,6 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Debug: mostrar rol actual
-  console.log('Current user:', user);
-  console.log('Current role:', user?.role);
-  console.log('Has token:', !!token);
-
   // Form states
   const [doctorForm, setDoctorForm] = useState({
     first_name: '',
@@ -96,8 +91,8 @@ export default function AdminPanel() {
     }
   };
 
-  // Check role - show message if not authorized
-  if (!user || (user?.role !== 'secretary' && user?.role !== 'admin')) {
+  // Check role - solo admin tiene acceso
+  if (!user || user?.role !== 'admin') {
     return (
       <div className="p-8">
         <h1 className="text-2xl font-light text-nota-ink mb-4 font-serif">

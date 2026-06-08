@@ -241,6 +241,96 @@ router.patch('/patients/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// ── PATCH /api/patients/:id/consent — Firmar consentimiento informado
+router.patch('/patients/:id/consent', authMiddleware, async (req, res) => {
+  try {
+    const { witness } = req.body;
+    const { data, error } = await req.supabase
+      .from('patients')
+      .update({
+        consent_signed: true,
+        consent_signed_at: new Date().toISOString(),
+        consent_witness: witness || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', req.params.id)
+      .eq('org_id', req.user.orgId)
+      .select()
+      .single();
+    if (error) return res.status(400).json({ error: error.message });
+    res.json(formatPatient(data));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── POST /api/patients/:id/id-document — Subir identificación oficial
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
+
+router.post('/patients/:id/id-document', authMiddleware, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo' });
+    const { document_type } = req.body;
+    const ext = req.file.originalname.split('.').pop();
+    const path = `${req.user.orgId}/${req.params.id}/id_${Date.now()}.${ext}`;
+
+    const { error: upErr } = await req.supabase.storage
+      .from('patient-documents')
+      .upload(path, req.file.buffer, { contentType: req.file.mimetype, upsert: true });
+
+    if (upErr) return res.status(500).json({ error: upErr.message });
+
+    const { data: { publicUrl } } = req.supabase.storage
+      .from('patient-documents')
+      .getPublicUrl(path);
+
+    const { data, error } = await req.supabase
+      .from('patients')
+      .update({
+        id_document_type: document_type || null,
+        id_document_url: publicUrl,
+        id_document_name: req.file.originalname,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', req.params.id)
+      .eq('org_id', req.user.orgId)
+      .select()
+      .single();
+
+    if (error) return res.status(400).json({ error: error.message });
+    res.json(formatPatient(data));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── PATCH /api/patients/:id/billing — Guardar datos de facturación
+router.patch('/patients/:id/billing', authMiddleware, async (req, res) => {
+  try {
+    const { requires_invoice, rfc, razon_social, uso_cfdi, regimen_fiscal, billing_email } = req.body;
+    const { data, error } = await req.supabase
+      .from('patients')
+      .update({
+        requires_invoice: !!requires_invoice,
+        rfc: rfc || null,
+        razon_social: razon_social || null,
+        uso_cfdi: uso_cfdi || null,
+        regimen_fiscal: regimen_fiscal || null,
+        billing_email: billing_email || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', req.params.id)
+      .eq('org_id', req.user.orgId)
+      .select()
+      .single();
+    if (error) return res.status(400).json({ error: error.message });
+    res.json(formatPatient(data));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── DELETE /api/patients/:id — Soft delete
 router.delete('/patients/:id', authMiddleware, async (req, res) => {
   try {

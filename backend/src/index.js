@@ -1,12 +1,12 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 const authRoutes = require('./routes/auth');
 const signupRoutes = require('./routes/signup');
-const doctorRoutes = require('./routes/doctors');   
-const patientRoutes = require('./routes/patients'); 
-const appointmentRoutes = require('./routes/appointments'); 
+const doctorRoutes = require('./routes/doctors');
+const patientRoutes = require('./routes/patients');
+const appointmentRoutes = require('./routes/appointments');
 const valeriaRoutes = require('./routes/valeria');
 const clinicalNotesRoutes = require('./routes/clinical_notes');
 const doctorRegisterRoutes = require('./routes/doctor_register');
@@ -15,24 +15,32 @@ const ayudaRoutes = require('./routes/ayuda');
 const planesRoutes = require('./routes/planes');
 const estadisticasRoutes = require('./routes/estadisticas');
 const formsRoutes = require('./routes/forms');
+const agendaRoutes = require('./routes/agenda');
+const remindersRoutes = require('./routes/reminders');
 const scribeRoutes = require('./routes/scribe');
+const patientRecordsRoutes = require('./routes/patient_records');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+// Preferir service_role key (bypasea RLS, solo debe usarse en el backend).
+// Fallback a anon key mientras no este configurada.
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ SUPABASE_URL or SUPABASE_ANON_KEY not set');
+  console.error('SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (o SUPABASE_ANON_KEY) son requeridos');
   process.exit(1);
 }
-const supabase = createClient(supabaseUrl, supabaseKey);
-console.log('✅ Supabase initialized');
+const usingServiceRole = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+console.log('Supabase initialized - ' + (usingServiceRole ? 'service_role key' : 'anon key (agrega SUPABASE_SERVICE_ROLE_KEY al .env)'));
 
 // CORS configuration
 const corsOptions = {
   origin: [
-    'http://localhost:5173', 
+    'http://localhost:5173',
     'http://localhost:3000',
     'https://nota-saas.vercel.app',
     'https://*.vercel.app'
@@ -53,9 +61,9 @@ app.use((req, res, next) => {
 });
 
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'Nōta Backend is running',
+  res.json({
+    status: 'OK',
+    message: 'Nota Backend is running',
     timestamp: new Date().toISOString()
   });
 });
@@ -66,15 +74,15 @@ app.get('/api/test-db', async (req, res) => {
       .from('organizations')
       .select('*')
       .limit(1);
-    
+
     if (error) {
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Database connection failed',
-        details: error.message 
+        details: error.message
       });
     }
-    
-    res.json({ 
+
+    res.json({
       status: 'OK',
       message: 'Database connection successful',
       organizations_count: data.length
@@ -98,13 +106,16 @@ app.use('/api/ayuda', ayudaRoutes);
 app.use('/api/planes', planesRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
 app.use('/api/forms', formsRoutes);
+app.use('/api/agenda', agendaRoutes);
+app.use('/api/reminders', remindersRoutes);
+app.use('/api', patientRecordsRoutes);
 
 
 app.use((err, req, res, next) => {
-  console.error('❌ Error:', err.message);
-  res.status(500).json({ 
+  console.error('Error:', err.message);
+  res.status(500).json({
     error: 'Internal Server Error',
-    message: err.message 
+    message: err.message
   });
 });
 
@@ -113,7 +124,7 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ Nōta Backend running on http://localhost:${PORT}`);
-  console.log(`✅ Health check: http://localhost:${PORT}/health`);
-  console.log(`✅ CORS enabled for vercel and localhost`);
+  console.log('Nota Backend running on http://localhost:' + PORT);
+  console.log('Health check: http://localhost:' + PORT + '/health');
+  console.log('CORS enabled for vercel and localhost');
 });

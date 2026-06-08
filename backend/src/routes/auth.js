@@ -72,7 +72,7 @@ router.post('/signup', async (req, res) => {
       return res.status(500).json({ error: 'Error al crear el usuario', details: userError.message });
     }
 
-    const token = generateToken(user.id, orgId, email);
+    const token = generateToken(user.id, orgId, email, user.role);
 
     res.status(201).json({
       message: 'Usuario creado correctamente',
@@ -151,7 +151,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    const token = generateToken(user.id, resolvedOrgId, email);
+    const token = generateToken(user.id, resolvedOrgId, email, user.role);
 
     res.status(200).json({
       message: 'Sesión iniciada correctamente',
@@ -222,7 +222,7 @@ router.post('/refresh', authMiddleware, async (req, res) => {
 
     if (error || !user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    const newToken = generateToken(user.id, user.org_id, user.email);
+    const newToken = generateToken(user.id, user.org_id, user.email, user.role);
 
     res.json({
       user: { id: user.id, email: user.email, orgId: user.org_id, role: user.role },

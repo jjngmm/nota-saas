@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
+const requireRole = require('../middleware/requireRole');
 
 async function getDoctorId(supabase, userId) {
   const { data } = await supabase.from('doctors').select('id').eq('user_id', userId).single();
@@ -8,7 +9,7 @@ async function getDoctorId(supabase, userId) {
 }
 
 // GET /api/planes/mi-plan
-router.get('/mi-plan', authMiddleware, async (req, res) => {
+router.get('/mi-plan', authMiddleware, requireRole("admin"), async (req, res) => {
   try {
     const doctorId = await getDoctorId(req.supabase, req.user.userId);
 
@@ -43,7 +44,7 @@ router.get('/mi-plan', authMiddleware, async (req, res) => {
 });
 
 // GET /api/planes/historial
-router.get('/historial', authMiddleware, async (req, res) => {
+router.get('/historial', authMiddleware, requireRole("admin"), async (req, res) => {
   try {
     const doctorId = await getDoctorId(req.supabase, req.user.userId);
 
@@ -61,7 +62,7 @@ router.get('/historial', authMiddleware, async (req, res) => {
 });
 
 // PUT /api/planes/cambiar
-router.put('/cambiar', authMiddleware, async (req, res) => {
+router.put('/cambiar', authMiddleware, requireRole("admin"), async (req, res) => {
   try {
     const doctorId = await getDoctorId(req.supabase, req.user.userId);
     const { plan, billing_period } = req.body;
@@ -101,7 +102,7 @@ router.put('/cambiar', authMiddleware, async (req, res) => {
 });
 
 // PUT /api/planes/facturacion
-router.put('/facturacion', authMiddleware, async (req, res) => {
+router.put('/facturacion', authMiddleware, requireRole("admin"), async (req, res) => {
   try {
     const { rfc, razon_social, uso_cfdi, regimen_fiscal, billing_email } = req.body;
 

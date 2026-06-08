@@ -498,3 +498,29 @@
   .suive-kpi-row { grid-template-columns: 1fr; }
   .suive-eno-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ── Historial de citas ── */
+.hist-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.hist-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.hist-badge--blue   { background: #dbeafe; color: #1d4ed8; }
+.hist-badge--teal   { background: #ccfbf1; color: #0f766e; }
+.hist-badge--green  { background: #dcfce7; color: #166534; }
+.hist-badge--red    { background: #fee2e2; color: #991b1b; }
+.hist-badge--yellow { background: #fef9c3; color: #854d0e; }
+.hist-badge--orange { background: #ffedd5; color: #9a3412; }

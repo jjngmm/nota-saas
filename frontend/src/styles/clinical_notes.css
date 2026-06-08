@@ -352,3 +352,385 @@
   gap: 2rem;
 }
 
+
+/* ============================================================
+   Expediente clínico — página completa
+   ============================================================ */
+
+.exp-content {
+  max-width: 960px;
+}
+
+/* ── Info strip ── */
+.exp-info-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.exp-info-strip__section {
+  padding: 0.75rem 1.25rem;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.exp-info-strip__section:last-child { border-right: none; }
+
+.exp-info-strip__label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-40);
+}
+
+.exp-info-strip__value {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.exp-info-strip__age {
+  font-size: 0.75rem;
+  color: var(--ink-40);
+  font-weight: 400;
+}
+
+.exp-blood {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--error);
+}
+
+/* ── Allergy bar ── */
+.exp-allergy-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  color: #9a3412;
+  margin-bottom: 1.25rem;
+}
+
+.exp-allergy-bar__icon { font-size: 0.95rem; }
+.exp-allergy-bar__label { font-weight: 700; }
+
+/* ── Empty state ── */
+.exp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.exp-empty__icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.exp-empty__title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600; color: var(--ink); }
+.exp-empty__desc { font-size: 0.875rem; color: var(--ink-40); margin-top: 0.4rem; }
+.exp-empty-inline { font-size: 0.85rem; color: var(--ink-40); padding: 0.5rem 0; }
+
+/* ── Body ── */
+.exp-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Section ── */
+.exp-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.exp-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.exp-section__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.exp-section__icon { font-size: 1rem; }
+
+.exp-section__body {
+  padding: 1.25rem;
+}
+
+/* ── Vitals grid ── */
+.exp-vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.75rem;
+}
+
+.exp-vital-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.exp-vital-field__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-40);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.exp-vital-field__unit {
+  font-size: 0.65rem;
+  font-weight: 400;
+  text-transform: none;
+  color: var(--ink-40);
+}
+
+.exp-vital-input {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: #fff;
+  text-align: center;
+  transition: border-color 0.15s;
+}
+
+.exp-vital-input:focus { outline: none; border-color: var(--forest-mid); }
+.exp-vital-input:read-only { background: var(--bg); color: var(--ink-40); }
+
+.exp-vital-field--imc .exp-vital-imc {
+  padding: 0.5rem;
+  border: 1px dashed var(--border);
+  border-radius: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--forest-mid);
+  text-align: center;
+  background: var(--forest-soft, #f0f7f2);
+}
+
+/* ── SOAP ── */
+.exp-soap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 680px) {
+  .exp-soap-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Diagnóstico ── */
+.exp-dx-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.exp-dx-main { flex: 1; }
+.exp-dx-cie  { flex: 0 0 130px; }
+
+.exp-field-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-40);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+
+.exp-text-input {
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-family: var(--font);
+  font-size: 0.875rem;
+  color: var(--ink);
+  background: #fff;
+  transition: border-color 0.15s;
+}
+
+.exp-text-input:focus { outline: none; border-color: var(--forest-mid); }
+.exp-text-input:read-only { background: var(--bg); color: var(--ink-40); }
+.exp-text-input--mono { font-family: var(--font-mono); letter-spacing: 0.05em; }
+
+/* ── Prescripciones ── */
+.exp-add-rx-btn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--forest-mid);
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--forest-mid);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exp-add-rx-btn:hover { background: var(--forest-soft, #f0f7f2); }
+
+.exp-rx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.exp-rx-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.exp-rx-card__num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--forest-mid);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
+.exp-rx-card__fields { flex: 1; display: flex; flex-direction: column; gap: 0.6rem; }
+
+.exp-rx-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.exp-rx-field {
+  flex: 1 1 130px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.exp-rx-field--wide { flex: 2 1 200px; }
+
+.exp-rx-field label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-40);
+}
+
+.exp-rx-card__remove {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-40);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  margin-top: 0.15rem;
+}
+
+.exp-rx-card__remove:hover { background: var(--error-soft); color: var(--error); border-color: var(--error); }
+
+/* ── Save indicator ── */
+.exp-save {
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.exp-save--saving { color: var(--ink-40); }
+.exp-save--saved  { color: var(--forest-mid); background: var(--forest-soft, #f0f7f2); }
+.exp-save--error  { color: var(--error); background: var(--error-soft); }
+
+/* ── Confirm sign modal ── */
+.exp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 1rem;
+}
+
+.exp-modal {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+}
+
+.exp-modal__title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.75rem;
+}
+
+.exp-modal__body {
+  font-size: 0.875rem;
+  color: var(--ink-40);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.exp-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}

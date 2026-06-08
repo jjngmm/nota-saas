@@ -1,6 +1,11 @@
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
+// roles ausente = visible para todos
+// admin   = dueño de clínica O médico personal (acceso total)
+// doctor  = médico dentro de clínica (funciones personales)
+// secretary = asistente de clínica o personal (agenda + cobros)
 const NAV_ITEMS = [
   {
     to: "/dashboard",
@@ -13,18 +18,8 @@ const NAV_ITEMS = [
     ),
   },
   {
-    to: "/doctors",
-    label: "Médicos",
-    icon: (
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
-  {
-    to: "/appointments",
-    label: "Citas",
+    to: "/agenda",
+    label: "Agenda",
     icon: (
       <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
@@ -33,13 +28,12 @@ const NAV_ITEMS = [
     ),
   },
   {
-    to: "/formularios",
-    label: "Formularios",
-    roles: ["doctor"],
+    to: "/patients",
+    label: "Pacientes",
     icon: (
       <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
       </svg>
     ),
   },
@@ -54,8 +48,55 @@ const NAV_ITEMS = [
     ),
   },
   {
+    to: "/doctors",
+    label: "Médicos",
+    roles: ["admin"],
+    icon: (
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+  },
+  {
+    to: "/formularios",
+    label: "Formularios",
+    roles: ["admin", "doctor"],
+    icon: (
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+    ),
+  },
+  {
+    to: "/configuracion",
+    label: "Configuración",
+    roles: ["admin", "doctor"],
+    icon: (
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+  },
+  {
+    to: "/admin",
+    label: "Panel admin",
+    roles: ["admin"],
+    icon: (
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+  },
+  {
     to: "/planes",
     label: "Planes y pagos",
+    roles: ["admin"],
     icon: (
       <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
@@ -73,34 +114,26 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
-  {
-    to: "/configuracion",
-    label: "Configuración",
-    roles: ["doctor"],
-    icon: (
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
-  {
-    to: "/patients",
-    label: "Pacientes",
-    roles: ["secretary", "admin"],
-    icon: (
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
-  },
 ];
+
+const ROLE_LABELS = {
+  admin:     "Administrador",
+  doctor:    "Médico",
+  secretary: "Asistente",
+};
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem("sidebar-collapsed") === "true"
+  );
+
+  useEffect(() => {
+    document.body.classList.toggle("sidebar-collapsed", collapsed);
+    localStorage.setItem("sidebar-collapsed", collapsed);
+  }, [collapsed]);
 
   function handleLogout() {
     logout();
@@ -116,8 +149,7 @@ export default function Sidebar() {
     : "U";
 
   return (
-    <aside className="sidebar">
-      {/* Logo — ō itálica en Cormorant Garamond (brand guidelines §04) */}
+    <aside className={`sidebar${collapsed ? " sidebar--collapsed" : ""}`}>
       <div className="sidebar-logo">
         <div className="sidebar-logo-mark">
           <span>ō</span>
@@ -125,12 +157,26 @@ export default function Sidebar() {
         <span className="logo-text">N<em>ō</em>ta</span>
       </div>
 
-      {/* Nav */}
+      <button
+        className="sidebar-toggle"
+        onClick={() => setCollapsed((c) => !c)}
+        title={collapsed ? "Expandir menú" : "Contraer menú"}
+        aria-label={collapsed ? "Expandir menú" : "Contraer menú"}
+      >
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {collapsed
+            ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+          }
+        </svg>
+      </button>
+
       <nav className="sidebar-nav">
         {visibleItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
+            title={collapsed ? item.label : undefined}
             className={({ isActive }) =>
               `nav-item ${isActive ? "nav-item--active" : ""}`
             }
@@ -141,13 +187,14 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* User footer */}
       <div className="sidebar-footer">
         <div className="user-info">
-          <div className="user-avatar">{initials}</div>
+          <div className="user-avatar" title={collapsed ? (user?.full_name || "Usuario") : undefined}>
+            {initials}
+          </div>
           <div className="user-details">
             <p className="user-name">{user?.full_name || "Usuario"}</p>
-            <p className="user-role">{user?.role || ""}</p>
+            <p className="user-role">{ROLE_LABELS[user?.role] || user?.role || ""}</p>
           </div>
         </div>
         <button className="logout-btn" onClick={handleLogout} title="Cerrar sesión">

@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
+const requireRole = require('../middleware/requireRole');
 
-router.post('/doctors', authMiddleware, async (req, res) => {
+router.post('/doctors', authMiddleware, requireRole('admin'), async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
 
     const { first_name, last_name, specialty, license_number, phone, bio } = req.body;
     const org_id = req.user.orgId;

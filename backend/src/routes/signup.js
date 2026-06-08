@@ -71,7 +71,7 @@ router.post('/register', async (req, res) => {
         });
       }
 
-      const token = generateToken(user.id, orgId, email);
+      const token = generateToken(user.id, orgId, email, user.role);
 
       return res.status(201).json({
         message: 'Patient account created successfully',

@@ -16,7 +16,11 @@ import PlanesPage from "./pages/PlanesPage";
 import EstadisticasPage from "./pages/EstadisticasPage";
 import FormulariosPage from "./pages/FormulariosPage";
 import FormularioPublico from "./pages/FormularioPublico";
+import AgendaPage from "./pages/AgendaPage";
+import PatientPage from "./pages/PatientPage";
 import "./styles/nota.css";
+import "./styles/patient_page.css";
+import "./styles/agenda.css";
 import "./styles/appointments.css";
 import "./styles/patients.css";
 import "./styles/dashboard.css";
@@ -52,60 +56,42 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/doctors"
-            element={
-              <ProtectedRoute>
-                <DoctorsPage />
-              </ProtectedRoute>
-            }
+          <Route path="/doctors"
+            element={<ProtectedRoute roles={["admin"]}><DoctorsPage /></ProtectedRoute>}
           />
-          <Route
-            path="/appointments"
-            element={
-              <ProtectedRoute>
-                <AppointmentsPage />
-              </ProtectedRoute>
-            }
+          <Route path="/appointments"
+            element={<ProtectedRoute><AppointmentsPage /></ProtectedRoute>}
           />
-          <Route
-            path="/patients"
-            element={
-              <ProtectedRoute>
-                <PatientsPage />
-              </ProtectedRoute>
-            }
+          <Route path="/patients"
+            element={<ProtectedRoute><PatientsPage /></ProtectedRoute>}
           />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute roles={["secretary", "admin"]}>
-                <AdminPanel />
-              </ProtectedRoute>
-            }
+          <Route path="/patients/:id"
+            element={<ProtectedRoute><PatientPage /></ProtectedRoute>}
           />
-          <Route
-            path="/configuracion"
-            element={<ProtectedRoute><ConfiguracionPage /></ProtectedRoute>}
+          <Route path="/admin"
+            element={<ProtectedRoute roles={["admin"]}><AdminPanel /></ProtectedRoute>}
           />
-          <Route
-            path="/ayuda"
+          <Route path="/configuracion"
+            element={<ProtectedRoute roles={["admin","doctor"]}><ConfiguracionPage /></ProtectedRoute>}
+          />
+          <Route path="/ayuda"
             element={<ProtectedRoute><AyudaPage /></ProtectedRoute>}
           />
-          <Route
-            path="/planes"
-            element={<ProtectedRoute><PlanesPage /></ProtectedRoute>}
+          <Route path="/planes"
+            element={<ProtectedRoute roles={["admin"]}><PlanesPage /></ProtectedRoute>}
           />
-          <Route
-            path="/estadisticas"
+          <Route path="/estadisticas"
             element={<ProtectedRoute><EstadisticasPage /></ProtectedRoute>}
           />
-          <Route
-            path="/formularios"
-            element={<ProtectedRoute><FormulariosPage /></ProtectedRoute>}
+          <Route path="/formularios"
+            element={<ProtectedRoute roles={["admin","doctor"]}><FormulariosPage /></ProtectedRoute>}
           />
           {/* Ruta pública — no requiere autenticación */}
           <Route path="/f/:token" element={<FormularioPublico />} />
+          <Route
+            path="/agenda"
+            element={<ProtectedRoute><AgendaPage /></ProtectedRoute>}
+          />
           <Route
             path="/clinical-notes/:appointment_id"
             element={

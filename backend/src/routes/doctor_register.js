@@ -63,7 +63,7 @@ router.post('/doctor-register', async (req, res) => {
         org_id: org.id,
         email,
         password_hash: passwordHash,
-        role: 'doctor',
+        role: 'admin',
         status: 'active',
       })
       .select()
@@ -101,11 +101,11 @@ router.post('/doctor-register', async (req, res) => {
       return res.status(500).json({ error: 'Error al crear el perfil del médico', details: doctorError.message });
     }
 
-    const token = generateToken(user.id, org.id, email);
+    const token = generateToken(user.id, org.id, email, 'admin');
 
     res.status(201).json({
       message: 'Registro exitoso',
-      user: { id: user.id, email: user.email, orgId: org.id, role: 'doctor', orgName: org.name },
+      user: { id: user.id, email: user.email, orgId: org.id, role: 'admin', orgName: org.name },
       doctor: { id: doctor.id, first_name, last_name, specialty },
       token,
     });
