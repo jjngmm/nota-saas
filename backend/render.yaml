@@ -3,12 +3,19 @@ services:
     name: nota-backend
     env: node
     plan: free
+    rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: PORT
         value: 3001
+      - key: NODE_ENV
+        value: production
       - key: SUPABASE_URL
-        generateValue: true
+        sync: false
       - key: SUPABASE_ANON_KEY
-        generateValue: true
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
