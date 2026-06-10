@@ -19,6 +19,7 @@ const agendaRoutes = require('./routes/agenda');
 const remindersRoutes = require('./routes/reminders');
 const scribeRoutes = require('./routes/scribe');
 const patientRecordsRoutes = require('./routes/patient_records');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -109,6 +110,7 @@ app.use('/api/forms', formsRoutes);
 app.use('/api/agenda', agendaRoutes);
 app.use('/api/reminders', remindersRoutes);
 app.use('/api', patientRecordsRoutes);
+app.use('/api/admin', adminRoutes);
 
 
 app.use((err, req, res, next) => {
