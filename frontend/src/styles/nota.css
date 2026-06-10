@@ -42,6 +42,23 @@
   --accent-soft: var(--forest-soft);
   --accent-2:    var(--forest);
 
+  /* Aliases de compatibilidad — variables referenciadas en componentes
+     que no existian en la paleta original (evita colores heredados) */
+  --ink-80:        var(--ink-90);
+  --ink-60:        var(--ink-70);
+  --ink-50:        #4A5A64;
+  --ink-20:        var(--ink-15);
+  --forest-bg:     var(--forest-soft);
+  --forest-dark:   var(--forest);
+  --surface-alt:   var(--cream-dark);
+  --cream-soft:    #FBFAF7;
+  --accent-bg:     var(--forest-soft);
+  --accent-border: var(--forest-lite);
+  --text-h:        var(--ink);
+  --white:         #ffffff;
+  --font-sans:     var(--font);
+  --social-bg:     var(--forest-soft);
+
   /* Estados semánticos */
   --success:     var(--forest-mid);
   --success-soft: var(--forest-soft);
@@ -401,8 +418,8 @@ body.sidebar-collapsed .nota-main {
 
 .btn--ghost {
   background: transparent;
-  color: var(--text-2);
-  border: 1px solid transparent;
+  color: var(--ink-70);
+  border: 1px solid var(--border-2);
 }
 .btn--ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
 
