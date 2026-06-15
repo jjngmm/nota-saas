@@ -88,7 +88,7 @@ router.get('/appointments/:id', authMiddleware, async (req, res) => {
     
     let query = req.supabase
       .from('appointments')
-      .select('*, doctors(first_name, last_name, specialty), patients(first_name, last_name, email, birth_date, phone, allergies, blood_type)')
+      .select('*, doctors(first_name, last_name, last_name_maternal, specialty, license_number, signature_url, user_id), patients(first_name, last_name, email, birth_date, phone, allergies, blood_type)')
       .eq('id', id)
       .eq('org_id', req.user.orgId);
     

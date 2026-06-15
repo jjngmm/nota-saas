@@ -182,6 +182,59 @@
   border: 0.5px solid var(--forest-lite);
 }
 
+/* Hint cuando el usuario no es el médico tratante */
+.note-sign-hint {
+  font-size: 0.78rem;
+  color: var(--ink-40);
+  font-style: italic;
+}
+
+/* ── Bloque de firma del médico tratante ── */
+.exp-signature {
+  margin: 2.5rem auto 0;
+  max-width: 360px;
+  text-align: center;
+  padding-top: 1rem;
+}
+.exp-signature__line {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 70px;
+  border-bottom: 1.5px solid var(--ink-70, #2A3A48);
+  margin-bottom: 0.6rem;
+}
+.exp-signature__img {
+  max-height: 70px;
+  max-width: 100%;
+  object-fit: contain;
+}
+.exp-signature__placeholder {
+  height: 70px;
+}
+.exp-signature__name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink, #0D1117);
+}
+.exp-signature__detail {
+  font-size: 0.78rem;
+  color: var(--ink-60, #2A3A48);
+  margin-top: 0.15rem;
+}
+.exp-signature__stamp {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--forest-mid);
+}
+.exp-signature__pending {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--warning, #d97706);
+  font-style: italic;
+}
+
 /* Recording UI */
 .scribe-bar {
   display: flex;

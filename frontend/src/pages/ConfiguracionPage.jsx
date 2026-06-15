@@ -186,6 +186,7 @@ function PerfilSection({ configData, setConfigData, showToast }) {
     estado: doc.estado || '',
     codigo_postal: doc.codigo_postal || '',
     profile_image_url: doc.profile_image_url || '',
+    signature_url: doc.signature_url || '',
     google_calendar_sync: doc.google_calendar_sync || false,
     google_sheets_sync: doc.google_sheets_sync || false,
   });
@@ -239,6 +240,29 @@ function PerfilSection({ configData, setConfigData, showToast }) {
                 placeholder="https://..." />
             </div>
             <span className="config-avatar-hint">Ingresa la URL de tu foto de perfil</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Firma digital */}
+      <div className="config-card">
+        <div className="config-card__title">Firma digital</div>
+        <p className="config-section__sub" style={{ marginTop: 0, marginBottom: '0.75rem' }}>
+          Aparecerá en tus notas clínicas firmadas, recetas e informes.
+        </p>
+        <div className="config-avatar-row">
+          {form.signature_url
+            ? <img src={form.signature_url} className="config-signature-preview" alt="Firma" />
+            : <div className="config-signature-preview config-signature-preview--empty">Sin firma</div>
+          }
+          <div className="config-avatar-actions">
+            <div className="config-field">
+              <label className="config-label">URL de la imagen de tu firma</label>
+              <input className="config-input" style={{ width: 260 }} value={form.signature_url}
+                onChange={e => setForm(p => ({ ...p, signature_url: e.target.value }))}
+                placeholder="https://..." />
+            </div>
+            <span className="config-avatar-hint">Sube tu firma a un servicio de imágenes y pega aquí el enlace (fondo transparente PNG recomendado)</span>
           </div>
         </div>
       </div>

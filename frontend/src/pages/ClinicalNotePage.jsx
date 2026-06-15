@@ -81,12 +81,14 @@ export default function ClinicalNotePage() {
     if (!appointment) return;
     setCreating(true);
     try {
-      const res = await api.post('/api/clinical-notes', {
+      await api.post('/api/clinical-notes', {
         appointment_id,
         patient_id: appointment.patient_id,
         doctor_id: appointment.doctor_id,
       });
-      setNote(res.data.data);
+      // Recargar para traer la nota con el join del médico (firma, cédula, etc.)
+      const noteRes = await api.get(`/api/clinical-notes?appointment_id=${appointment_id}`);
+      setNote(noteRes.data.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -184,10 +186,16 @@ export default function ClinicalNotePage() {
   }
 
   const isSigned   = note?.status === 'signed';
-  const canSign    = ['admin', 'doctor'].includes(user?.role) && !isSigned;
   const patient    = appointment?.patients || appointment?.patient || {};
-  const doctor     = appointment?.doctors  || appointment?.doctor  || {};
+  // Datos del médico tratante: preferir el join de la nota, si no el de la cita
+  const doctor     = note?.doctors || appointment?.doctors || appointment?.doctor || {};
   const age        = calcAge(patient.date_of_birth);
+
+  // El médico tratante es el dueño del doctor_id de la nota/cita.
+  // Solo él puede firmar (el backend también lo valida).
+  const treatingDoctorUserId = note?.doctors?.user_id || appointment?.doctors?.user_id || null;
+  const isTreatingDoctor = !!treatingDoctorUserId && treatingDoctorUserId === user?.id;
+  const canSign    = isTreatingDoctor && !isSigned;
 
   // ── Loading ──────────────────────────────────────────────────
   if (loading) {
@@ -221,6 +229,11 @@ export default function ClinicalNotePage() {
                 <Button onClick={() => setConfirmSign(true)} disabled={signing}>
                   ✍ Firmar nota
                 </Button>
+              )}
+              {!isSigned && note && !canSign && (
+                <span className="note-sign-hint">
+                  Solo {doctor.first_name ? `Dr(a). ${doctor.first_name} ${doctor.last_name || ''}` : 'el médico tratante'} puede firmar
+                </span>
               )}
               {isSigned && (
                 <span className="note-status-badge note-status-badge--signed">✓ Firmada</span>
@@ -409,6 +422,9 @@ export default function ClinicalNotePage() {
                 </ExpSection>
               )}
 
+              {/* ── Firma del médico tratante ── */}
+              <SignatureBlock doctor={doctor} isSigned={isSigned} signedAt={note.signed_at} />
+
             </div>
           )}
         </div>
@@ -436,6 +452,45 @@ export default function ClinicalNotePage() {
 }
 
 // ── Sub-componentes ───────────────────────────────────────────
+
+function fmtDateTime(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleString('es-MX', {
+    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+}
+
+function SignatureBlock({ doctor, isSigned, signedAt }) {
+  const fullName = [doctor.first_name, doctor.last_name, doctor.last_name_maternal]
+    .filter(Boolean).join(' ');
+
+  return (
+    <div className={`exp-signature${isSigned ? ' exp-signature--signed' : ''}`}>
+      <div className="exp-signature__line">
+        {isSigned && doctor.signature_url
+          ? <img src={doctor.signature_url} alt="Firma" className="exp-signature__img" />
+          : <div className="exp-signature__placeholder" />
+        }
+      </div>
+      <div className="exp-signature__name">
+        {fullName ? `Dr(a). ${fullName}` : 'Médico tratante'}
+      </div>
+      {doctor.specialty && (
+        <div className="exp-signature__detail">{doctor.specialty}</div>
+      )}
+      {doctor.license_number && (
+        <div className="exp-signature__detail">Cédula Profesional: {doctor.license_number}</div>
+      )}
+      {isSigned ? (
+        <div className="exp-signature__stamp">
+          ✓ Firmado electrónicamente el {fmtDateTime(signedAt)}
+        </div>
+      ) : (
+        <div className="exp-signature__pending">Pendiente de firma del médico tratante</div>
+      )}
+    </div>
+  );
+}
 
 function ExpSection({ title, icon, action, children }) {
   return (

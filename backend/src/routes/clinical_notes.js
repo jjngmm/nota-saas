@@ -12,7 +12,7 @@ router.get('/clinical-notes', authMiddleware, async (req, res) => {
 
     const { data, error } = await req.supabase
       .from('clinical_notes')
-      .select('*, doctors(first_name, last_name), patients(first_name, last_name)')
+      .select('*, doctors(first_name, last_name, last_name_maternal, specialty, license_number, signature_url, user_id), patients(first_name, last_name)')
       .eq('org_id', req.user.orgId)
       .eq('appointment_id', appointment_id)
       .single();
@@ -34,7 +34,7 @@ router.get('/clinical-notes/patient/:patient_id', authMiddleware, async (req, re
 
     const { data, error } = await req.supabase
       .from('clinical_notes')
-      .select('*, doctors(first_name, last_name), appointments(date, time)')
+      .select('*, doctors(first_name, last_name, last_name_maternal, specialty, license_number, signature_url, user_id), appointments(date, time)')
       .eq('org_id', req.user.orgId)
       .eq('patient_id', patient_id)
       .order('created_at', { ascending: false });
@@ -112,9 +112,38 @@ router.put('/clinical-notes/:id', authMiddleware, async (req, res) => {
 });
 
 // POST /api/clinical-notes/:id/sign
+// Solo el médico tratante (doctor_id de la nota) puede firmarla.
 router.post('/clinical-notes/:id/sign', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
+
+    // 1. Obtener la nota
+    const { data: note, error: noteErr } = await req.supabase
+      .from('clinical_notes')
+      .select('id, doctor_id, status')
+      .eq('id', id)
+      .eq('org_id', req.user.orgId)
+      .single();
+
+    if (noteErr || !note) return res.status(404).json({ error: 'Nota no encontrada' });
+    if (note.status === 'signed') return res.status(400).json({ error: 'La nota ya está firmada' });
+
+    // 2. Obtener el perfil de médico del usuario que firma
+    const { data: signerDoctor } = await req.supabase
+      .from('doctors')
+      .select('id, first_name, last_name')
+      .eq('user_id', req.user.userId)
+      .eq('org_id', req.user.orgId)
+      .single();
+
+    if (!signerDoctor) {
+      return res.status(403).json({ error: 'Solo un médico con perfil puede firmar notas clínicas' });
+    }
+
+    // 3. El firmante debe ser el médico tratante de la nota
+    if (signerDoctor.id !== note.doctor_id) {
+      return res.status(403).json({ error: 'Solo el médico tratante puede firmar esta nota' });
+    }
 
     const { data, error } = await req.supabase
       .from('clinical_notes')
@@ -126,7 +155,7 @@ router.post('/clinical-notes/:id/sign', authMiddleware, async (req, res) => {
       })
       .eq('id', id)
       .eq('org_id', req.user.orgId)
-      .select()
+      .select('*, doctors(first_name, last_name, last_name_maternal, specialty, license_number, signature_url, user_id), patients(first_name, last_name)')
       .single();
 
     if (error) return res.status(500).json({ error: error.message });

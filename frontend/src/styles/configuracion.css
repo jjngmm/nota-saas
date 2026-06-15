@@ -211,6 +211,25 @@
   color: var(--ink-40);
 }
 
+/* Vista previa de firma digital */
+.config-signature-preview {
+  width: 180px;
+  height: 72px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid var(--ink-15, #D8DCE0);
+  object-fit: contain;
+  padding: 4px;
+}
+.config-signature-preview--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  color: var(--ink-40);
+  background: var(--cream-dark, #EDE9E0);
+}
+
 /* Toggle switch */
 .config-toggle-list {
   display: flex;
