@@ -123,6 +123,7 @@ export default function PatientPage() {
 
   const [patient, setPatient]   = useState(null);
   const [loading, setLoading]   = useState(true);
+  const [denied, setDenied]     = useState(false);
   const [tab, setTab]           = useState('historia');
   const [topHistoria, setTopHistoria] = useState(null); // para AllergyAlert
 
@@ -133,14 +134,32 @@ export default function PatientPage() {
     ]).then(([rPat, rHist]) => {
       setPatient(rPat.data);
       setTopHistoria(rHist.data?.data || null);
-    }).catch(() => navigate('/patients'))
-      .finally(() => setLoading(false));
+    }).catch((err) => {
+      if (err?.response?.status === 403) setDenied(true);
+      else navigate('/patients');
+    }).finally(() => setLoading(false));
   }, [id]);
 
   if (loading) return (
     <div className="nota-layout"><Sidebar />
       <div className="nota-main"><Navbar title="Paciente" />
         <div className="nota-content"><p style={{color:'var(--ink-40)',padding:'3rem 0'}}>Cargando...</p></div>
+      </div>
+    </div>
+  );
+  if (denied) return (
+    <div className="nota-layout"><Sidebar />
+      <div className="nota-main"><Navbar title="Acceso restringido" />
+        <div className="nota-content">
+          <div className="pp-empty">
+            <div className="pp-empty__icon">🔒</div>
+            <p>No tienes acceso al expediente de este paciente.</p>
+            <p style={{fontSize:'0.85rem',color:'var(--ink-40)',marginTop:'0.35rem'}}>
+              Solo puedes ver el expediente de pacientes que tienes agendados contigo.
+            </p>
+            <button className="pp-back-btn" style={{marginTop:'1.25rem'}} onClick={() => navigate('/patients')}>← Volver a Pacientes</button>
+          </div>
+        </div>
       </div>
     </div>
   );

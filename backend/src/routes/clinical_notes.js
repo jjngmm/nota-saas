@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
+const { canAccessPatient } = require('../utils/patientAccess');
 
 // GET /api/clinical-notes?appointment_id=...
 router.get('/clinical-notes', authMiddleware, async (req, res) => {
@@ -21,6 +22,11 @@ router.get('/clinical-notes', authMiddleware, async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
 
+    // Médico solo puede ver notas de sus pacientes
+    if (data && !(await canAccessPatient(req.supabase, req.user, data.patient_id))) {
+      return res.status(403).json({ error: 'No tienes acceso a las notas de este paciente' });
+    }
+
     res.json({ data: data || null });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -31,6 +37,10 @@ router.get('/clinical-notes', authMiddleware, async (req, res) => {
 router.get('/clinical-notes/patient/:patient_id', authMiddleware, async (req, res) => {
   try {
     const { patient_id } = req.params;
+
+    if (!(await canAccessPatient(req.supabase, req.user, patient_id))) {
+      return res.status(403).json({ error: 'No tienes acceso a las notas de este paciente' });
+    }
 
     const { data, error } = await req.supabase
       .from('clinical_notes')
@@ -54,6 +64,10 @@ router.post('/clinical-notes', authMiddleware, async (req, res) => {
 
     if (!appointment_id || !patient_id || !doctor_id) {
       return res.status(400).json({ error: 'appointment_id, patient_id y doctor_id son requeridos' });
+    }
+
+    if (!(await canAccessPatient(req.supabase, req.user, patient_id))) {
+      return res.status(403).json({ error: 'No tienes acceso al expediente de este paciente' });
     }
 
     const { data, error } = await req.supabase
@@ -89,6 +103,18 @@ router.put('/clinical-notes/:id', authMiddleware, async (req, res) => {
       raw_transcript, ai_summary,
       vital_signs, diagnosis, diagnosis_cie10, prescriptions,
     } = req.body;
+
+    // Verificar que la nota sea de un paciente al que el médico tiene acceso
+    const { data: existing } = await req.supabase
+      .from('clinical_notes').select('patient_id, status')
+      .eq('id', id).eq('org_id', req.user.orgId).single();
+    if (!existing) return res.status(404).json({ error: 'Nota no encontrada' });
+    if (!(await canAccessPatient(req.supabase, req.user, existing.patient_id))) {
+      return res.status(403).json({ error: 'No tienes acceso a esta nota' });
+    }
+    if (existing.status === 'signed') {
+      return res.status(400).json({ error: 'La nota ya está firmada y no puede modificarse' });
+    }
 
     const { data, error } = await req.supabase
       .from('clinical_notes')

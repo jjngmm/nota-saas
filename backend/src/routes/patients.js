@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
+const { accessiblePatientIds, canAccessPatient } = require('../utils/patientAccess');
 
 function calcAge(birthDate) {
   if (!birthDate) return null;
@@ -30,6 +31,10 @@ router.get('/patients', authMiddleware, async (req, res) => {
       .eq('org_id', org_id)
       .eq('active', true)
       .order('created_at', { ascending: false });
+
+    // Médicos solo ven sus pacientes (agendados con ellos o creados por ellos)
+    const allowedIds = await accessiblePatientIds(req.supabase, req.user);
+    if (allowedIds !== null) query = query.in('id', allowedIds.length ? allowedIds : ['00000000-0000-0000-0000-000000000000']);
 
     if (gender) query = query.eq('gender', gender);
     if (phone)  query = query.ilike('phone', `%${phone}%`);
@@ -67,11 +72,16 @@ router.get('/patients/search', authMiddleware, async (req, res) => {
     const { q, gender, age_min, age_max, diagnostico } = req.query;
     const org_id = req.user.orgId;
 
-    const { data, error } = await req.supabase
+    let baseQuery = req.supabase
       .from('patients')
       .select('*')
       .eq('org_id', org_id)
       .eq('active', true);
+
+    const allowedIds = await accessiblePatientIds(req.supabase, req.user);
+    if (allowedIds !== null) baseQuery = baseQuery.in('id', allowedIds.length ? allowedIds : ['00000000-0000-0000-0000-000000000000']);
+
+    const { data, error } = await baseQuery;
 
     if (error) return res.status(400).json({ error: error.message });
 
@@ -111,6 +121,9 @@ router.get('/patients/search', authMiddleware, async (req, res) => {
 // ── GET /api/patients/:id
 router.get('/patients/:id', authMiddleware, async (req, res) => {
   try {
+    const allowed = await canAccessPatient(req.supabase, req.user, req.params.id);
+    if (!allowed) return res.status(403).json({ error: 'No tienes acceso al expediente de este paciente' });
+
     const { data, error } = await req.supabase
       .from('patients')
       .select('*')
@@ -153,6 +166,7 @@ router.post('/patients', authMiddleware, async (req, res) => {
       .from('patients')
       .insert([{
         org_id: req.user.orgId,
+        created_by: req.user.userId,
         first_name, last_name, last_name_maternal: last_name_maternal || null,
         birth_date: birth_date || null,
         gender: gender || null,

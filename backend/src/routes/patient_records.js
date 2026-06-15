@@ -1,8 +1,13 @@
 const express = require('express');
 const router  = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
+const { requirePatientAccess } = require('../utils/patientAccess');
 const multer  = require('multer');
 const upload  = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
+
+// Todas las rutas del expediente cuelgan de /patients/:id — el médico
+// solo puede acceder si el paciente está agendado con él o lo creó él.
+router.use('/patients/:id', authMiddleware, requirePatientAccess);
 
 // ══ Helpers ════════════════════════════════════════════════════
 async function storageUpload(supabase, bucket, path, buffer, mimetype) {
